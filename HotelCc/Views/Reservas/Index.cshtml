@@ -1,0 +1,71 @@
+@model IEnumerable<HotelCc.Models.Reserva>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UsuarioId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Usuario)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HabitacionId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Habitacion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaEntrada)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaSalida)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaReserva)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.UsuarioId)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Usuario)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.HabitacionId)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Habitacion)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.FechaEntrada)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.FechaSalida)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.FechaReserva)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
