@@ -1,0 +1,128 @@
+﻿@using HotelCc.Models
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var reservas = ViewBag.ReservasRecientes as List<Reserva>;
+}
+
+<div class="container mt-5">
+
+    <h1 class="mb-4 text-primary fw-bold">
+        📊 Dashboard Admin
+    </h1>
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-3">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-body text-center">
+
+                    <h5>Total Habitaciones</h5>
+
+                    <h2 class="text-primary">
+                        @ViewBag.TotalHabitaciones
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-body text-center">
+
+                    <h5>Total Reservas</h5>
+
+                    <h2 class="text-success">
+                        @ViewBag.TotalReservas
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-body text-center">
+
+                    <h5>Total Usuarios</h5>
+
+                    <h2 class="text-dark">
+                        @ViewBag.TotalUsuarios
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-body text-center">
+
+                    <h5>Ingresos Estimados</h5>
+
+                    <h2 class="text-danger">
+                        S/ @ViewBag.Ingresos
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0 rounded-4">
+
+        <div class="card-body">
+
+            <h3 class="mb-4">
+                🏨 Reservas Recientes
+            </h3>
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Habitación</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in reservas!)
+                    {
+                        <tr>
+
+                            <td>
+                                @item.Usuario?.Nombre
+                            </td>
+
+                            <td>
+                                @item.Habitacion?.Numero
+                            </td>
+
+                            <td>
+                                @item.FechaEntrada.ToShortDateString()
+                            </td>
+
+                            <td>
+                                @item.FechaSalida.ToShortDateString()
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

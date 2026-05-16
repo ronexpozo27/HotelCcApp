@@ -1,66 +1,95 @@
 @model HotelCc.Models.Reserva
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nueva Reserva";
 }
 
-<h1>Create</h1>
+<div class="container mt-5">
 
-<h4>Reserva</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="card shadow border-0 rounded-4">
 
-            <div class="form-group">
-                <label asp-for="UsuarioId" class="control-label"></label>
-                <input asp-for="UsuarioId" class="form-control" />
-                <span asp-validation-for="UsuarioId" class="text-danger"></span>
-            </div>
+        <div class="card-body p-4">
 
-            <div class="form-group">
-                <label asp-for="Usuario" class="control-label"></label>
-                <input asp-for="Usuario" class="form-control" />
-                <span asp-validation-for="Usuario" class="text-danger"></span>
-            </div>
+            <h2 class="text-primary mb-4">
+                🏨 Nueva Reserva
+            </h2>
 
-            <div class="form-group">
-                <label asp-for="HabitacionId" class="control-label"></label>
-                <input asp-for="HabitacionId" class="form-control" />
-                <span asp-validation-for="HabitacionId" class="text-danger"></span>
-            </div>
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Error
+                </div>
+            }
 
-            <div class="form-group">
-                <label asp-for="Habitacion" class="control-label"></label>
-                <input asp-for="Habitacion" class="form-control" />
-                <span asp-validation-for="Habitacion" class="text-danger"></span>
-            </div>
+            <form asp-action="Create">
 
-            <div class="form-group">
-                <label asp-for="FechaEntrada" class="control-label"></label>
-                <input asp-for="FechaEntrada" class="form-control" />
-                <span asp-validation-for="FechaEntrada" class="text-danger"></span>
-            </div>
+                <div class="mb-3">
 
-            <div class="form-group">
-                <label asp-for="FechaSalida" class="control-label"></label>
-                <input asp-for="FechaSalida" class="form-control" />
-                <span asp-validation-for="FechaSalida" class="text-danger"></span>
-            </div>
+                    <label class="form-label">
+                        Usuario
+                    </label>
 
-            <div class="form-group">
-                <label asp-for="FechaReserva" class="control-label"></label>
-                <input asp-for="FechaReserva" class="form-control" />
-                <span asp-validation-for="FechaReserva" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+                    <select asp-for="UsuarioId"
+                            class="form-select"
+                            asp-items="ViewBag.UsuarioId">
+                    </select>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Habitación
+                    </label>
+
+                    <select asp-for="HabitacionId"
+                            class="form-select"
+                            asp-items="ViewBag.HabitacionId">
+                    </select>
+
+                    <small class="text-muted">
+                        1er Piso = S/100 |
+                        2do Piso = S/200 |
+                        3er Piso = S/350
+                    </small>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Fecha Entrada
+                    </label>
+
+                    <input asp-for="FechaEntrada"
+                           type="date"
+                           class="form-control" />
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Fecha Salida
+                    </label>
+
+                    <input asp-for="FechaSalida"
+                           type="date"
+                           class="form-control" />
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    Guardar Reserva
+
+                </button>
+
+            </form>
+
+        </div>
+
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>

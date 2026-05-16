@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using HotelCc.Data;
+﻿using HotelCc.Data;
+using HotelCc.Models;
 using HotelCc.ViewModels;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HotelCc.Controllers
 {
@@ -14,35 +14,67 @@ namespace HotelCc.Controllers
             _context = context;
         }
 
+        // GET: Login
         public IActionResult Login()
         {
             return View();
         }
 
+        // POST: Login
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public IActionResult Login(LoginViewModel model)
         {
-            var user = await _context.Usuarios
-                .FirstOrDefaultAsync(u =>
-                    u.Email == model.Email &&
-                    u.Password == model.Password);
+            var usuarios = _context.Usuarios.ToList();
 
-            if (user != null)
+            var user = usuarios.FirstOrDefault(u =>
+                u.Email!.Trim().ToLower() ==
+                model.Email!.Trim().ToLower());
+
+            if (user == null)
             {
-                HttpContext.Session.SetString("Usuario", user.Nombre ?? "");
-                HttpContext.Session.SetString("Rol", user.Rol ?? "");
+                ViewBag.Error = "Usuario no encontrado";
 
-                return RedirectToAction("Index", "Habitaciones");
+                return View(model);
             }
 
-            ViewBag.Error = "Credenciales incorrectas";
-            return View(model);
+            if (user.Password!.Trim() != model.Password!.Trim())
+            {
+                ViewBag.Error = "Contraseña incorrecta";
+
+                return View(model);
+            }
+
+            HttpContext.Session.SetString(
+                "Usuario",
+                user.Nombre ?? "");
+
+            HttpContext.Session.SetString(
+                "Rol",
+                user.Rol ?? "");
+
+            // DEBUG TEMPORAL
+            Console.WriteLine("ROL = " + user.Rol);
+
+            if (user.Rol!.Trim() == "Admin")
+            {
+                return RedirectToAction(
+                    "Dashboard",
+                    "Admin");
+            }
+
+            return RedirectToAction(
+                "Index",
+                "Reservas");
         }
 
+        // LOGOUT
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+
+            return RedirectToAction(
+                "Login",
+                "Auth");
         }
     }
 }
