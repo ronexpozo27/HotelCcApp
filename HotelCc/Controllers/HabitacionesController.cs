@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HotelCc.Data;
 using HotelCc.Models;
+using HotelCc.Filters;
 
 namespace HotelCc.Controllers
 {
+    [AuthorizeRole("Admin")]
     public class HabitacionesController : Controller
     {
         private readonly AppDbContext _context;
