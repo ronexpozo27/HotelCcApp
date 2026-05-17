@@ -52,6 +52,10 @@ namespace HotelCc.Controllers
                 "Rol",
                 user.Rol ?? "");
 
+            HttpContext.Session.SetInt32(
+                "UserId",
+                user.Id);
+
             // DEBUG TEMPORAL
             Console.WriteLine("ROL = " + user.Rol);
 

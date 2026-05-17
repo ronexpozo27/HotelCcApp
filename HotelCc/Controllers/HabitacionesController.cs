@@ -7,7 +7,6 @@ using HotelCc.Filters;
 
 namespace HotelCc.Controllers
 {
-    [AuthorizeRole("Admin")]
     public class HabitacionesController : Controller
     {
         private readonly AppDbContext _context;
@@ -20,7 +19,26 @@ namespace HotelCc.Controllers
         // GET: Habitaciones
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Habitaciones.ToListAsync());
+            var habitaciones = await _context.Habitaciones.ToListAsync();
+            var reservas = await _context.Reservas.ToListAsync();
+
+            var hoy = DateTime.Today;
+
+            var model = habitaciones.Select(h => new HabitacionEstadoViewModel
+            {
+                Id = h.Id,
+                Numero = h.Numero,
+                Tipo = h.Tipo,
+                Precio = h.Precio,
+                Estado = reservas.Any(r =>
+                    r.HabitacionId == h.Id &&
+                    r.FechaEntrada <= hoy &&
+                    r.FechaSalida >= hoy)
+                    ? "Ocupada"
+                    : "Disponible"
+            }).ToList();
+
+            return View(model);
         }
     }
 }

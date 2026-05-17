@@ -1,14 +1,14 @@
-<table class="table table-hover align-middle">
+@model List<HotelCc.Models.HabitacionEstadoViewModel>
 
-    <thead class="table-dark">
+<table class="table table-hover">
 
+    <thead>
         <tr>
             <th>Número</th>
             <th>Tipo</th>
             <th>Precio</th>
             <th>Estado</th>
         </tr>
-
     </thead>
 
     <tbody>
@@ -16,22 +16,12 @@
         @foreach (var item in Model)
         {
             <tr>
-
-                <td>
-                    @item.Numero
-                </td>
-
-                <td>
-                    @item.Tipo
-                </td>
-
-                <td>
-                    S/ @item.Precio
-                </td>
-
+                <td>@item.Numero</td>
+                <td>@item.Tipo</td>
+                <td>S/ @item.Precio</td>
                 <td>
 
-                    @if (item.Disponible)
+                    @if (item.Estado == "Disponible")
                     {
                         <span class="badge bg-success">
                             Disponible
@@ -40,12 +30,11 @@
                     else
                     {
                         <span class="badge bg-danger">
-                            Ocupado
+                            Ocupada
                         </span>
                     }
 
                 </td>
-
             </tr>
         }
 

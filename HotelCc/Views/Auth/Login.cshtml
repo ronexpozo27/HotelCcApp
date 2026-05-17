@@ -1,6 +1,7 @@
 ﻿@model HotelCc.ViewModels.LoginViewModel
 
 @{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
     ViewData["Title"] = "Login";
 }
 
@@ -25,7 +26,7 @@
                         </div>
                     }
 
-                    <form asp-action="Login">
+                    <form asp-controller="Auth" asp-action="Login" method="post">
 
                         <div class="mb-3">
 

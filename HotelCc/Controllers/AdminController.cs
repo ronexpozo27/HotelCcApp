@@ -27,7 +27,6 @@ namespace HotelCc.Controllers
                 _context.Usuarios.Count();
 
             ViewBag.HabitacionesDisponibles =
-                _context.Habitaciones.Count(h => h.Disponible);
 
             // Reservas recientes
             ViewBag.ReservasRecientes = await _context.Reservas

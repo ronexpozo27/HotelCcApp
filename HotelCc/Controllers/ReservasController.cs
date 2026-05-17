@@ -20,12 +20,27 @@ namespace HotelCc.Controllers
         // GET: Reservas
         public async Task<IActionResult> Index()
         {
-            var reservas = await _context.Reservas
+            var rol = HttpContext.Session.GetString("Rol");
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (rol == "Admin")
+            {
+                var reservasAdmin = await _context.Reservas
+                    .Include(r => r.Usuario)
+                    .Include(r => r.Habitacion)
+                    .ToListAsync();
+
+                return View(reservasAdmin);
+            }
+
+            var reservasUser = await _context.Reservas
                 .Include(r => r.Usuario)
                 .Include(r => r.Habitacion)
+                .Where(r => r.UsuarioId == userId)
                 .ToListAsync();
 
-            return View(reservas);
+            return View(reservasUser);
         }
 
         // GET: Reservas/Details/5
@@ -53,14 +68,10 @@ namespace HotelCc.Controllers
         public IActionResult Create()
         {
             ViewData["HabitacionId"] = new SelectList(
-                _context.Habitaciones,
+                _context.Habitaciones
+                    .OrderBy(h => h.Numero),
                 "Id",
                 "Numero");
-
-            ViewData["UsuarioId"] = new SelectList(
-                _context.Usuarios,
-                "Id",
-                "Nombre");
 
             return View();
         }
@@ -79,7 +90,7 @@ namespace HotelCc.Controllers
 
             if (ocupada)
             {
-                ViewBag.Error = "La habitación ya está reservada en esas fechas.";
+                ViewBag.Error = "La habitación no está disponible en el rango de fechas seleccionado.";
 
                 ViewData["HabitacionId"] = new SelectList(
                     _context.Habitaciones,
@@ -87,33 +98,38 @@ namespace HotelCc.Controllers
                     "Numero",
                     reserva.HabitacionId);
 
-                ViewData["UsuarioId"] = new SelectList(
-                    _context.Usuarios,
-                    "Id",
-                    "Nombre",
-                    reserva.UsuarioId);
-
                 return View(reserva);
             }
 
+            var habitacion = await _context.Habitaciones
+    .FirstOrDefaultAsync(h => h.Id == reserva.HabitacionId);
+
+            int dias = (reserva.FechaSalida - reserva.FechaEntrada).Days;
+
+            decimal total = dias * habitacion!.Precio;
+
             var nuevaReserva = new Reserva
             {
-                UsuarioId = reserva.UsuarioId,
+                UsuarioId = HttpContext.Session.GetInt32("UserId") ?? 0,
+
                 HabitacionId = reserva.HabitacionId,
 
                 FechaEntrada = DateTime.SpecifyKind(
-                reserva.FechaEntrada,
-                DateTimeKind.Utc),
+                    reserva.FechaEntrada,
+                    DateTimeKind.Utc),
 
-                        FechaSalida = DateTime.SpecifyKind(
-                reserva.FechaSalida,
-                DateTimeKind.Utc),
+                FechaSalida = DateTime.SpecifyKind(
+                    reserva.FechaSalida,
+                    DateTimeKind.Utc),
 
-                FechaReserva = DateTime.UtcNow
+                FechaReserva = DateTime.UtcNow,
+
+                Total = total
             };
 
             _context.Reservas.Add(nuevaReserva);
 
+            
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -165,6 +181,8 @@ namespace HotelCc.Controllers
                 {
                     _context.Update(reserva);
 
+
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -207,12 +225,20 @@ namespace HotelCc.Controllers
         // POST: Reservas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+
+        public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             var reserva = await _context.Reservas.FindAsync(id);
 
             if (reserva != null)
             {
+                var habitacion = await _context.Habitaciones
+                    .FindAsync(reserva.HabitacionId);
+
+                if (habitacion != null)
+                {
+                }
+
                 _context.Reservas.Remove(reserva);
             }
 
