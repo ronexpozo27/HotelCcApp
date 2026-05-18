@@ -59,6 +59,15 @@
                             📊 Dashboard
                         </a>
                     </li>
+
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white"
+                           asp-controller="Usuarios"
+                           asp-action="Index">
+                            👥 Usuarios
+                        </a>
+                    </li>
+
                 }
 
                 <!-- LOGOUT -->
@@ -84,6 +93,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
 </html>

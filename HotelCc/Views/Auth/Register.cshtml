@@ -1,8 +1,8 @@
-﻿@model HotelCc.ViewModels.LoginViewModel
+﻿@model HotelCc.ViewModels.RegisterViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutLogin.cshtml";
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Registro";
 }
 
 <div class="container mt-5">
@@ -15,18 +15,22 @@
 
                 <div class="card-body p-4">
 
-                    <h2 class="text-center mb-4 text-primary">
-                        HotelCc Login
+                    <h2 class="text-center mb-4 text-success">
+                        📝 Registro
                     </h2>
 
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger">
-                            @ViewBag.Error
-                        </div>
-                    }
+                    <form asp-action="Register">
 
-                    <form asp-controller="Auth" asp-action="Login" method="post">
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Nombre
+                            </label>
+
+                            <input asp-for="Nombre"
+                                   class="form-control" />
+
+                        </div>
 
                         <div class="mb-3">
 
@@ -52,23 +56,21 @@
                         </div>
 
                         <button type="submit"
-                                class="btn btn-primary w-100">
-                            Ingresar
+                                class="btn btn-success w-100">
+                            Registrarse
                         </button>
 
-                        
-
-                        <hr />
-
-                        <div class="text-center">
-
-                            <a asp-action="Register">
-                                ¿No tienes cuenta? Regístrate
-                            </a>
-
-                        </div>
-
                     </form>
+
+                    <hr />
+
+                    <div class="text-center">
+
+                        <a asp-action="Login">
+                            ¿Ya tienes cuenta? Inicia sesión
+                        </a>
+
+                    </div>
 
                 </div>
 

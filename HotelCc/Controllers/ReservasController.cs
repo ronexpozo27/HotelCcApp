@@ -40,6 +40,8 @@ namespace HotelCc.Controllers
                 .Where(r => r.UsuarioId == userId)
                 .ToListAsync();
 
+
+
             return View(reservasUser);
         }
 

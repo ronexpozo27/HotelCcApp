@@ -1,7 +1,7 @@
-@model IEnumerable<HotelCc.Models.Reserva>
+﻿@model IEnumerable<HotelCc.Models.Usuario>
 
 @{
-    ViewData["Title"] = "Reservas";
+    ViewData["Title"] = "Usuarios";
 }
 
 <div class="container-fluid">
@@ -9,17 +9,20 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
+
             <h2 class="fw-bold">
-                📅 Reservas
+                👥 Usuarios del Sistema
             </h2>
 
             <p class="text-muted mb-0">
-                Gestión de reservas del hotel
+                Administración de usuarios y administradores
             </p>
+
         </div>
 
-        <a asp-action="Create" class="btn btn-primary shadow-sm">
-            + Nueva Reserva
+        <a asp-action="Create"
+           class="btn btn-primary shadow-sm">
+            + Nuevo Usuario
         </a>
 
     </div>
@@ -35,13 +38,13 @@
                     <thead class="table-light">
 
                         <tr>
-                            <th>Usuario</th>
-                            <th>Habitación</th>
-                            <th>Entrada</th>
-                            <th>Salida</th>
-                            <th>Reserva</th>
-                            <th>Estado</th>
-                            <th class="text-center">Acciones</th>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th class="text-center">
+                                Acciones
+                            </th>
                         </tr>
 
                     </thead>
@@ -50,48 +53,34 @@
 
                         @foreach (var item in Model)
                         {
-                            bool activa =
-                            item.FechaEntrada.Date <= DateTime.Today &&
-                            item.FechaSalida.Date >= DateTime.Today;
-
                             <tr>
 
                                 <td>
+                                    @item.Id
+                                </td>
+
+                                <td>
                                     <strong>
-                                        @item.Usuario?.Nombre
+                                        @item.Nombre
                                     </strong>
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-dark">
-                                        Habitación @item.Habitacion?.Numero
-                                    </span>
-                                </td>
-
-                                <td>
-                                    @item.FechaEntrada.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-                                    @item.FechaSalida.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-                                    @item.FechaReserva.ToString("dd/MM/yyyy")
+                                    @item.Email
                                 </td>
 
                                 <td>
 
-                                    @if (activa)
+                                    @if (item.Rol == "Admin")
                                     {
                                         <span class="badge bg-danger">
-                                            Ocupada
+                                            Admin
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-success">
-                                            Finalizada
+                                        <span class="badge bg-primary">
+                                            User
                                         </span>
                                     }
 
@@ -103,6 +92,12 @@
                                        asp-route-id="@item.Id"
                                        class="btn btn-sm btn-outline-primary">
                                         Ver
+                                    </a>
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-warning">
+                                        Editar
                                     </a>
 
                                     <a asp-action="Delete"

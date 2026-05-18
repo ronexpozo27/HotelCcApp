@@ -20,6 +20,13 @@ namespace HotelCc.Controllers
             return View();
         }
 
+        // GET: Register
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+
         // POST: Login
         [HttpPost]
         public IActionResult Login(LoginViewModel model)
@@ -69,6 +76,35 @@ namespace HotelCc.Controllers
             return RedirectToAction(
                 "Index",
                 "Reservas");
+
+
+        }
+
+
+        // POST: Register
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            Usuario user = new Usuario()
+            {
+                Nombre = model.Nombre,
+                Email = model.Email,
+                Password = model.Password,
+
+                // SIEMPRE USER
+                Rol = "User"
+            };
+
+            _context.Usuarios.Add(user);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Login");
         }
 
         // LOGOUT
