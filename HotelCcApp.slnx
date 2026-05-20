@@ -1,6 +1,3 @@
 <Solution>
-  <Project Path="HotelCc.Tests/HotelCc.Tests.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
   <Project Path="HotelCc/HotelCc.csproj" />
 </Solution>

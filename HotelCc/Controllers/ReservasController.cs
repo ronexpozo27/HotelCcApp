@@ -15,15 +15,12 @@ namespace HotelCc.Controllers
             _context = context;
         }
 
-        
         // =========================
         // INDEX
         // =========================
-
         public async Task<IActionResult> Index()
         {
             var rol = HttpContext.Session.GetString("Rol");
-
             var userId = HttpContext.Session.GetInt32("UserId");
 
             if (rol == "Admin")
@@ -48,17 +45,14 @@ namespace HotelCc.Controllers
         }
 
         // =========================
-        // RESERVAR DESDE TARJETA
+        // RESERVAR DESDE HABITACIÓN
         // =========================
-
         public async Task<IActionResult> Reservar(int id)
         {
             var habitacion = await _context.Habitaciones.FindAsync(id);
 
             if (habitacion == null)
-            {
                 return NotFound();
-            }
 
             var model = new Reserva
             {
@@ -73,9 +67,8 @@ namespace HotelCc.Controllers
         }
 
         // =========================
-        // POST RESERVAR
+        // POST RESERVAR USUARIO
         // =========================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reservar(Reserva reserva)
@@ -83,34 +76,16 @@ namespace HotelCc.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
 
             if (userId == null)
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
-            // VALIDACIÓN FECHAS
+            var fechaEntrada = DateTime.SpecifyKind(reserva.FechaEntrada.Date, DateTimeKind.Unspecified);
+            var fechaSalida = DateTime.SpecifyKind(reserva.FechaSalida.Date, DateTimeKind.Unspecified);
 
-            if (reserva.FechaSalida <= reserva.FechaEntrada)
+            if (fechaSalida <= fechaEntrada)
             {
-                ViewBag.Error = "La fecha de salida debe ser mayor.";
-
+                ViewBag.Error = "Fecha inválida";
                 return View(reserva);
             }
-
-            // VALIDAR DISPONIBILIDAD
-
-            var fechaEntrada = reserva.FechaEntrada.Date;
-
-            var fechaSalida = reserva.FechaSalida.Date;
-
-            // VALIDAR FECHAS PASADAS
-
-            if (fechaEntrada < DateTime.Today)
-            {
-                ViewBag.Error = "No puedes reservar fechas pasadas.";
-
-                return View(reserva);
-            }
-
 
             bool ocupada = await _context.Reservas.AnyAsync(r =>
                 r.HabitacionId == reserva.HabitacionId &&
@@ -119,88 +94,47 @@ namespace HotelCc.Controllers
 
             if (ocupada)
             {
-                ViewBag.Error = "La habitación ya está reservada en esas fechas.";
-
+                ViewBag.Error = "Habitación ocupada";
                 return View(reserva);
             }
-
-            // HABITACIÓN
 
             var habitacion = await _context.Habitaciones
                 .FirstOrDefaultAsync(h => h.Id == reserva.HabitacionId);
 
-            if (habitacion == null)
-            {
-                return NotFound();
-            }
-
-            // TOTAL
-
             int dias = (fechaSalida - fechaEntrada).Days;
-            if (dias <= 0)
-            {
-                dias = 1;
-            }
+            if (dias <= 0) dias = 1;
 
-            decimal total = dias * habitacion.Precio;
-
-            // NUEVA RESERVA
+            decimal total = dias * habitacion!.Precio;
 
             var nuevaReserva = new Reserva
             {
                 UsuarioId = userId.Value,
-
                 HabitacionId = reserva.HabitacionId,
-
                 FechaEntrada = fechaEntrada,
                 FechaSalida = fechaSalida,
-
                 FechaReserva = DateTime.Now,
-
                 Total = total
             };
 
             _context.Reservas.Add(nuevaReserva);
-
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
         // =========================
-        // DETAILS
+        // CREATE ADMIN (USUARIO O EXTERNO)
         // =========================
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var reserva = await _context.Reservas
-                .Include(r => r.Usuario)
-                .Include(r => r.Habitacion)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (reserva == null)
-            {
-                return NotFound();
-            }
-
-            return View(reserva);
-        }
-
-        // =========================
-        // CREATE ADMIN
-        // =========================
-
         public IActionResult Create()
         {
+            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nombre");
+
             ViewData["HabitacionId"] = new SelectList(
-                _context.Habitaciones.OrderBy(h => h.Numero),
+                _context.Habitaciones
+                    .OrderBy(h => h.Numero),
                 "Id",
-                "Numero");
+                "Numero"
+            );
 
             return View();
         }
@@ -209,87 +143,61 @@ namespace HotelCc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Reserva reserva)
         {
-            var fechaEntrada = reserva.FechaEntrada.Date;
-
-            if (fechaEntrada < DateTime.Today)
-            {
-                ViewBag.Error = "No puedes crear reservas pasadas.";
-
-                ViewData["HabitacionId"] = new SelectList(
-                    _context.Habitaciones.OrderBy(h => h.Numero),
-                    "Id",
-                    "Numero");
-
-                return View(reserva);
-            }
-
             var habitacion = await _context.Habitaciones
                 .FirstOrDefaultAsync(h => h.Id == reserva.HabitacionId);
 
             if (habitacion == null)
-            {
                 return NotFound();
+
+            var fechaEntrada = reserva.FechaEntrada.Date;
+            var fechaSalida = reserva.FechaSalida.Date;
+
+            if (reserva.UsuarioId != null)
+            {
+                reserva.NombreHuespedExterno = null;
+            }
+            else
+            {
+                reserva.UsuarioId = null;
             }
 
-            int dias = (reserva.FechaSalida - reserva.FechaEntrada).Days;
+            int dias = (fechaSalida - fechaEntrada).Days;
+            if (dias <= 0) dias = 1;
 
             decimal total = dias * habitacion.Precio;
 
-            reserva.Total = total;
+            var nuevaReserva = new Reserva
+            {
+                UsuarioId = reserva.UsuarioId,
+                NombreHuespedExterno = reserva.NombreHuespedExterno,
+                HabitacionId = reserva.HabitacionId,
+                FechaEntrada = fechaEntrada,
+                FechaSalida = fechaSalida,
+                FechaReserva = DateTime.Now,
+                Total = total
+            };
 
-            reserva.FechaReserva = DateTime.Now;
-
-            _context.Reservas.Add(reserva);
-
+            _context.Reservas.Add(nuevaReserva);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
         // =========================
-        // EDIT
+        // DETAILS
         // =========================
-
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var reserva = await _context.Reservas.FindAsync(id);
+            var reserva = await _context.Reservas
+                .Include(r => r.Usuario)
+                .Include(r => r.Habitacion)
+                .FirstOrDefaultAsync(r => r.Id == id);
 
             if (reserva == null)
-            {
                 return NotFound();
-            }
-
-            ViewData["HabitacionId"] = new SelectList(
-                _context.Habitaciones,
-                "Id",
-                "Numero",
-                reserva.HabitacionId);
-
-            return View(reserva);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Reserva reserva)
-        {
-            if (id != reserva.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                _context.Update(reserva);
-
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-            }
 
             return View(reserva);
         }
@@ -297,37 +205,28 @@ namespace HotelCc.Controllers
         // =========================
         // DELETE
         // =========================
-
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var reserva = await _context.Reservas
                 .Include(r => r.Usuario)
                 .Include(r => r.Habitacion)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(r => r.Id == id);
 
             if (reserva == null)
-            {
                 return NotFound();
-            }
 
             return View(reserva);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int? id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var reserva = await _context.Reservas.FindAsync(id);
 
             if (reserva != null)
             {
                 _context.Reservas.Remove(reserva);
-
                 await _context.SaveChangesAsync();
             }
 
@@ -337,7 +236,6 @@ namespace HotelCc.Controllers
         // =========================
         // EXISTS
         // =========================
-
         private bool ReservaExists(int id)
         {
             return _context.Reservas.Any(e => e.Id == id);

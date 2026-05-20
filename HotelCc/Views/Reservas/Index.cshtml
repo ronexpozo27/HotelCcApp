@@ -4,130 +4,102 @@
     ViewData["Title"] = "Reservas";
 }
 
-<div class="container-fluid">
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">📋 Gestión de Reservas</h2>
 
-        <div>
-            <h2 class="fw-bold">
-                📅 Reservas
-            </h2>
+    <!-- BOTÓN NUEVA RESERVA -->
+    <a asp-controller="Habitaciones"
+       asp-action="Index"
+       class="btn btn-success">
+        ➕ Nueva Reserva
+    </a>
 
-            <p class="text-muted mb-0">
-                Gestión de reservas del hotel
-            </p>
-        </div>
+</div>
 
-        <a asp-controller="Habitaciones"
-           asp-action="Index"
-           class="btn btn-primary rounded-3 px-4">
+<!-- TABLA -->
+<div class="table-responsive">
+    <table class="table table-hover table-bordered align-middle shadow-sm">
 
-            🏨 Reservar Habitación
+        <thead class="table-dark">
+            <tr>
+                <th>Habitación</th>
+                <th>Usuario / Huésped</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Fecha Reserva</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
 
-        </a>
+        <tbody>
 
-    </div>
+            @foreach (var item in Model)
+            {
+                <tr>
 
-    <div class="card border-0 shadow-sm rounded-4">
+                    <!-- HABITACIÓN -->
+                    <td class="fw-bold text-primary">
+                        🏨 @item.Habitacion?.Numero
+                    </td>
 
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead class="table-light">
-
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Habitación</th>
-                            <th>Entrada</th>
-                            <th>Salida</th>
-                            <th>Reserva</th>
-                            <th>Estado</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @foreach (var item in Model)
+                    <!-- USUARIO O EXTERNO -->
+                    <td>
+                        @if (item.Usuario != null)
                         {
-                            bool activa =
-                            item.FechaEntrada.Date <= DateTime.Today &&
-                            item.FechaSalida.Date >= DateTime.Today;
-
-                            <tr>
-
-                                <td>
-                                    <strong>
-                                        @item.Usuario?.Nombre
-                                    </strong>
-                                </td>
-
-                                <td>
-                                    <span class="badge bg-dark">
-                                        Habitación @item.Habitacion?.Numero
-                                    </span>
-                                </td>
-
-                                <td>
-                                    @item.FechaEntrada.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-                                    @item.FechaSalida.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-                                    @item.FechaReserva.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-
-                                    @if (activa)
-                                    {
-                                        <span class="badge bg-danger">
-                                            Ocupada
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success">
-                                            Finalizada
-                                        </span>
-                                    }
-
-                                </td>
-
-                                <td class="text-center">
-
-                                    <a asp-action="Details"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-sm btn-outline-primary">
-                                        Ver
-                                    </a>
-
-                                    <a asp-action="Delete"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-sm btn-outline-danger">
-                                        Eliminar
-                                    </a>
-
-                                </td>
-
-                            </tr>
+                            <span>👤 @item.Usuario.Nombre</span>
                         }
+                        else
+                        {
+                            <span class="text-muted">
+                                🧳 @item.NombreHuespedExterno
+                            </span>
+                        }
+                    </td>
 
-                    </tbody>
+                    <!-- FECHA ENTRADA -->
+                    <td>
+                        📅 @item.FechaEntrada.ToString("dd/MM/yyyy")
+                    </td>
 
-                </table>
+                    <!-- FECHA SALIDA -->
+                    <td>
+                        📅 @item.FechaSalida.ToString("dd/MM/yyyy")
+                    </td>
 
-            </div>
+                    <!-- FECHA RESERVA -->
+                    <td>
+                        🕒 @item.FechaReserva.ToString("dd/MM/yyyy HH:mm")
+                    </td>
 
-        </div>
+                    <!-- TOTAL -->
+                    <td class="fw-bold text-success">
+                        S/ @item.Total.ToString("0.00")
+                    </td>
 
-    </div>
+                    <!-- ACCIONES -->
+                    <td>
 
+                        <a asp-action="Details"
+                           asp-route-id="@item.Id"
+                           class="btn btn-sm btn-info">
+                            Ver
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@item.Id"
+                           class="btn btn-sm btn-danger">
+                            Eliminar
+                        </a>
+
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
 </div>
