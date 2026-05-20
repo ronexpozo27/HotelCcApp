@@ -33,6 +33,7 @@ namespace HotelCc.Controllers
                 Numero = h.Numero,
                 Tipo = h.Tipo,
                 Precio = h.Precio,
+                ImagenUrl = h.ImagenUrl,
 
                 Estado = reservas.Any(r =>
                     r.HabitacionId == h.Id &&

@@ -1,0 +1,74 @@
+﻿@model HotelCc.Models.Reserva
+
+@{
+    ViewData["Title"] = "Reservar";
+}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+
+            <div class="card border-0 shadow rounded-4">
+
+                <div class="card-body p-4">
+
+                    <h2 class="fw-bold mb-4">
+                        🏨 Reservar Habitación
+                    </h2>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <form asp-action="Reservar">
+
+                        <input type="hidden"
+                               asp-for="HabitacionId" />
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Fecha Entrada
+                            </label>
+
+                            <input asp-for="FechaEntrada"
+                                   type="date"
+                                   class="form-control rounded-3" />
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Fecha Salida
+                            </label>
+
+                            <input asp-for="FechaSalida"
+                                   type="date"
+                                   class="form-control rounded-3" />
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100 rounded-3">
+
+                            Confirmar Reserva
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,104 +1,307 @@
 @model IEnumerable<HotelCc.Models.HabitacionEstadoViewModel>
 
+@using Microsoft.AspNetCore.Http
+
 @{
     ViewData["Title"] = "Habitaciones";
+
+    var rol = Context.Session.GetString("Rol");
 }
 
-<div class="container-fluid">
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
 
-            <h2 class="fw-bold">
-                🏨 Habitaciones
+            <h2 class="fw-bold mb-1">
+                🏨 Gestión de Habitaciones
             </h2>
 
             <p class="text-muted mb-0">
-                Administración de habitaciones del hotel
+                Explora nuestras habitaciones disponibles
             </p>
 
         </div>
 
-        <a asp-action="Create"
-           class="btn btn-primary shadow-sm">
-            + Nueva Habitación
+        @if (rol == "Admin")
+        {
+            <div class="dropdown">
+
+                <button class="btn btn-dark rounded-4 shadow-sm px-4 dropdown-toggle"
+                        data-bs-toggle="dropdown">
+
+                    ⚙ Administración
+
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
+
+                    <li>
+                        <a class="dropdown-item"
+                           asp-action="Create">
+                            ➕ Nueva Habitación
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item"
+                           asp-controller="Habitaciones"
+                           asp-action="IndexAdmin">
+                            🛠 Gestionar Habitaciones
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+        }
+
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Total Habitaciones
+                    </h6>
+
+                    <h2 class="fw-bold">
+                        @ViewBag.Total
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Disponibles
+                    </h6>
+
+                    <h2 class="fw-bold text-success">
+                        @ViewBag.Disponibles
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Ocupadas
+                    </h6>
+
+                    <h2 class="fw-bold text-danger">
+                        @ViewBag.Ocupadas
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTROS -->
+
+    <div class="mb-4 d-flex gap-2 flex-wrap">
+
+        <a asp-action="Index"
+           class="btn btn-outline-dark rounded-pill">
+            Todas
+        </a>
+
+        <a asp-action="Index"
+           asp-route-estado="Disponible"
+           class="btn btn-outline-success rounded-pill">
+            Disponibles
+        </a>
+
+        <a asp-action="Index"
+           asp-route-estado="Ocupada"
+           class="btn btn-outline-danger rounded-pill">
+            Ocupadas
         </a>
 
     </div>
+
+    <!-- HABITACIONES -->
 
     <div class="row g-4">
 
         @foreach (var item in Model)
         {
-            <div class="col-md-4 col-lg-3">
+            string imagen = "/images/habitaciones/100.jpg";
 
-                <div class="card border-0 shadow-sm rounded-4 h-100">
+            if (item.Numero.StartsWith("2"))
+            {
+                imagen = "/images/habitaciones/200.jpg";
+            }
+            else if (item.Numero.StartsWith("3"))
+            {
+                imagen = "/images/habitaciones/300.jpg";
+            }
 
-                    <div class="card-body d-flex flex-column">
+            <div class="col-md-6 col-lg-4 col-xl-3">
 
-                        <div class="d-flex justify-content-between align-items-start mb-3">
+                <a asp-controller="Reservas"
+                   asp-action="Reservar"
+                   asp-route-id="@item.Id"
+                   class="text-decoration-none text-dark">
 
-                            <div>
+                    <div class="card border-0 shadow-sm rounded-4 h-100 habitacion-card">
 
-                                <h4 class="fw-bold mb-0">
-                                    🛏 @item.Numero
-                                </h4>
+                        <!-- IMAGEN -->
+
+                        <img src="@imagen"
+                             class="card-img-top rounded-top-4"
+                             style="height: 230px; object-fit: cover;">
+
+                        <!-- BODY -->
+
+                        <div class="card-body d-flex flex-column">
+
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+
+                                <div>
+
+                                    <h4 class="fw-bold mb-1">
+                                        🛏 @item.Numero
+                                    </h4>
+
+                                    <small class="text-muted">
+                                        @item.Tipo
+                                    </small>
+
+                                </div>
+
+                                @if (item.Estado == "Disponible")
+                                {
+                                    <span class="badge bg-success px-3 py-2 rounded-pill">
+                                        Disponible
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                        Ocupada
+                                    </span>
+                                }
+
+                            </div>
+
+                            <!-- PRECIO -->
+
+                            <div class="mb-4">
+
+                                <h3 class="text-primary fw-bold">
+                                    S/ @item.Precio
+                                </h3>
 
                                 <small class="text-muted">
-                                    @item.Tipo
+                                    por noche
                                 </small>
 
                             </div>
 
-                            @if (item.Estado == "Disponible")
-                            {
-                                <span class="badge bg-success">
-                                    Disponible
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">
-                                    Ocupada
-                                </span>
-                            }
+                            <!-- SERVICIOS -->
 
-                        </div>
+                            <div class="mb-4">
 
-                        <div class="mb-4">
+                                @{
+                                    var numero = item.Numero?.ToString() ?? "";
+                                }
 
-                            <h5 class="text-primary fw-bold">
-                                S/ @item.Precio
-                            </h5>
+                                <div class="d-flex flex-wrap gap-2">
 
-                        </div>
+                                    <!-- BASE -->
 
-                        <div class="mt-auto d-grid gap-2">
+                                    <span class="badge bg-secondary">
+                                        📶 Wifi
+                                    </span>
 
-                            <a asp-action="Details"
-                               asp-route-id="@item.Id"
-                               class="btn btn-outline-primary btn-sm">
-                                Ver
-                            </a>
+                                    <span class="badge bg-secondary">
+                                        ❄ Aire
+                                    </span>
 
-                            <a asp-action="Edit"
-                               asp-route-id="@item.Id"
-                               class="btn btn-outline-warning btn-sm">
-                                Editar
-                            </a>
+                                    <span class="badge bg-secondary">
+                                        🚿 Baño
+                                    </span>
 
-                            <a asp-action="Delete"
-                               asp-route-id="@item.Id"
-                               class="btn btn-outline-danger btn-sm">
-                                Eliminar
-                            </a>
+                                    <!-- PISO 1 -->
+                                    @if (numero.StartsWith("1"))
+                                    {
+                                        <span class="badge bg-dark">
+                                            📺 TV
+                                        </span>
+                                    }
+
+                                    <!-- PISO 2 -->
+                                    @if (numero.StartsWith("2"))
+                                    {
+                                        <span class="badge bg-dark">
+                                            📺 TV
+                                        </span>
+
+                                        <span class="badge bg-info text-dark">
+                                            🛁 Jacuzzi
+                                        </span>
+                                    }
+
+                                    <!-- PISO 3 -->
+                                    @if (numero.StartsWith("3"))
+                                    {
+                                        <span class="badge bg-dark">
+                                            📺 TV
+                                        </span>
+
+                                        <span class="badge bg-info text-dark">
+                                            🛁 Jacuzzi
+                                        </span>
+
+                                        <span class="badge bg-warning text-dark">
+                                            🍽 Comida
+                                        </span>
+
+                                        <span class="badge bg-success">
+                                            🛎 Servicio
+                                        </span>
+                                    }
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
 
-                </div>
+                </a>
 
             </div>
         }
@@ -106,3 +309,26 @@
     </div>
 
 </div>
+
+<style>
+
+    .habitacion-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+        .habitacion-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.15) !important;
+        }
+
+    .card-img-top {
+        transition: transform 0.4s ease;
+    }
+
+    .habitacion-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+</style>

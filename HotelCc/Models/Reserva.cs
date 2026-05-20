@@ -1,4 +1,6 @@
-﻿namespace HotelCc.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HotelCc.Models
 {
     public class Reserva
     {
@@ -12,8 +14,10 @@
 
         public Habitacion? Habitacion { get; set; }
 
+        [DataType(DataType.Date)]
         public DateTime FechaEntrada { get; set; }
 
+        [DataType(DataType.Date)]
         public DateTime FechaSalida { get; set; }
 
         public DateTime FechaReserva { get; set; }
