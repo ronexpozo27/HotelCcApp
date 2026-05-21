@@ -1,25 +1,36 @@
-using HotelCc.Models;
+using HotelCc.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelCc.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly AppDbContext _context;
+
+        public HomeController(AppDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            return View();
-        }
+            ViewBag.TotalHabitaciones = _context.Habitaciones.Count();
+            ViewBag.TotalReservas = _context.Reservas.Count();
+            ViewBag.TotalUsuarios = _context.Usuarios.Count();
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+            ViewBag.Ingresos = _context.Reservas.Sum(r => r.Total);
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var reservas = _context.Reservas
+                .Include(r => r.Usuario)
+                .Include(r => r.Habitacion)
+                .OrderByDescending(r => r.Id)
+                .Take(10)
+                .ToList();
+
+            ViewBag.Reservas = reservas;
+
+            return View();
         }
     }
 }

@@ -8,135 +8,118 @@
 
 <form asp-action="Create" method="post">
 
-    <!-- =========================
-         TIPO DE CLIENTE
-         ========================= -->
+    <!-- ========================= -->
+    <!-- TIPO CLIENTE -->
+    <!-- ========================= -->
     <div class="mb-3">
         <label class="form-label fw-bold">¿Para quién es la reserva?</label>
 
         <div class="form-check">
             <input class="form-check-input"
                    type="radio"
+                   id="tipoUsuario"
                    name="tipoCliente"
                    value="usuario"
                    checked />
 
-            <label class="form-check-label">
-                👤 Usuario registrado
-            </label>
+            <label class="form-check-label">👤 Usuario registrado</label>
         </div>
 
         <div class="form-check">
             <input class="form-check-input"
                    type="radio"
+                   id="tipoExterno"
                    name="tipoCliente"
                    value="externo" />
 
-            <label class="form-check-label">
-                🧍 Huésped externo
-            </label>
+            <label class="form-check-label">🧍 Huésped externo</label>
         </div>
     </div>
 
     <hr />
 
-    <!-- =========================
-         USUARIO REGISTRADO
-         ========================= -->
+    <!-- ========================= -->
+    <!-- USUARIO -->
+    <!-- ========================= -->
     <div class="mb-3" id="usuarioBox">
-        <label class="form-label">Seleccionar usuario</label>
+        <label>Usuario registrado</label>
 
         <select asp-for="UsuarioId"
                 class="form-control"
                 asp-items="ViewBag.UsuarioId">
-            <option value="">-- Seleccione un usuario --</option>
+            <option value="">-- Seleccione un Usuario --</option>
         </select>
-
-        <small class="text-muted">
-            Solo si la reserva es para un usuario registrado.
-        </small>
     </div>
 
-    <!-- =========================
-         HUÉSPED EXTERNO
-         ========================= -->
+    <!-- ========================= -->
+    <!-- EXTERNO -->
+    <!-- ========================= -->
     <div class="mb-3" id="externoBox" style="display:none;">
-        <label class="form-label">Nombre del huésped externo</label>
+        <label>Nombre huésped externo</label>
 
         <input asp-for="NombreHuespedExterno"
                class="form-control"
                placeholder="Ej: Juan Pérez" />
-
-        <small class="text-muted">
-            Solo si el cliente no está registrado en el sistema.
-        </small>
     </div>
 
     <hr />
 
-    <!-- =========================
-         HABITACIÓN
-         ========================= -->
+    <!-- ========================= -->
+    <!-- HABITACIÓN -->
+    <!-- ========================= -->
     <div class="mb-3">
-        <label class="form-label">Habitación</label>
+        <label>Habitación</label>
 
         <select asp-for="HabitacionId"
                 class="form-control"
-                asp-items="ViewBag.HabitacionId">
-        </select>
+                asp-items="ViewBag.HabitacionId"></select>
     </div>
 
-    <!-- =========================
-         FECHAS
-         ========================= -->
+    <!-- ========================= -->
+    <!-- FECHAS -->
+    <!-- ========================= -->
     <div class="row">
 
         <div class="col-md-6 mb-3">
-            <label class="form-label">Fecha Entrada</label>
-            <input asp-for="FechaEntrada"
-                   type="date"
-                   class="form-control" />
+            <label>Fecha Entrada</label>
+            <input asp-for="FechaEntrada" type="date" class="form-control" />
         </div>
 
         <div class="col-md-6 mb-3">
-            <label class="form-label">Fecha Salida</label>
-            <input asp-for="FechaSalida"
-                   type="date"
-                   class="form-control" />
+            <label>Fecha Salida</label>
+            <input asp-for="FechaSalida" type="date" class="form-control" />
         </div>
 
     </div>
 
-    <!-- =========================
-         BOTÓN
-         ========================= -->
     <button type="submit" class="btn btn-success w-100">
         💾 Guardar Reserva
     </button>
 
 </form>
 
-<!-- =========================
-     SCRIPT LÓGICO UI
-     ========================= -->
+<!-- ========================= -->
+<!-- SCRIPT CORREGIDO -->
+<!-- ========================= -->
 <script>
-    const radios = document.getElementsByName("tipoCliente");
+    const usuarioRadio = document.getElementById("tipoUsuario");
+    const externoRadio = document.getElementById("tipoExterno");
 
     const usuarioBox = document.getElementById("usuarioBox");
     const externoBox = document.getElementById("externoBox");
 
-    radios.forEach(r => {
-        r.addEventListener("change", function () {
+    function actualizarVista() {
+        if (usuarioRadio.checked) {
+            usuarioBox.style.display = "block";
+            externoBox.style.display = "none";
+        } else {
+            usuarioBox.style.display = "none";
+            externoBox.style.display = "block";
+        }
+    }
 
-            if (this.value === "usuario") {
-                usuarioBox.style.display = "block";
-                externoBox.style.display = "none";
-            }
-            else {
-                usuarioBox.style.display = "none";
-                externoBox.style.display = "block";
-            }
+    usuarioRadio.addEventListener("change", actualizarVista);
+    externoRadio.addEventListener("change", actualizarVista);
 
-        });
-    });
+    actualizarVista(); // estado inicial
 </script>

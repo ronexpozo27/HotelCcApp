@@ -1,8 +1,137 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    var reservas = ViewBag.Reservas as List<HotelCc.Models.Reserva>;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2 class="mb-4">📊 Dashboard Admin</h2>
+
+<!-- ========================= -->
+<!-- KPIs -->
+<!-- ========================= -->
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>🏨 Habitaciones</h6>
+                <h3>@ViewBag.TotalHabitaciones</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>📅 Reservas</h6>
+                <h3>@ViewBag.TotalReservas</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>👤 Usuarios</h6>
+                <h3>@ViewBag.TotalUsuarios</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>💰 Ingresos</h6>
+                <h3>S/ @ViewBag.Ingresos</h3>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<!-- ========================= -->
+<!-- TABLA RESERVAS -->
+<!-- ========================= -->
+<div class="card shadow-sm border-0">
+
+    <div class="card-header bg-dark text-white">
+        🏨 Reservas Recientes
+    </div>
+
+    <div class="card-body p-0">
+
+        <table class="table table-hover mb-0">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Usuario</th>
+                    <th>Habitación</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (reservas != null && reservas.Any())
+                {
+                    foreach (var r in reservas)
+                    {
+                        <tr>
+
+                            <td>
+                                👤 @(r.Usuario?.Nombre ?? r.NombreHuespedExterno ?? "Externo")
+                            </td>
+
+                            <td>
+                                🏨 @r.Habitacion?.Numero
+                            </td>
+
+                            <td>
+                                @r.FechaEntrada.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @r.FechaSalida.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                <span class="fw-bold text-success">
+                                    S/ @r.Total.ToString("0.00")
+                                </span>
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted p-3">
+                            No hay reservas registradas
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- ESTILO -->
+<!-- ========================= -->
+<style>
+    .card {
+        border-radius: 12px;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>

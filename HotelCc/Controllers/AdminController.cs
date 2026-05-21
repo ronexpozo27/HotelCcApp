@@ -17,18 +17,27 @@ namespace HotelCc.Controllers
 
         public async Task<IActionResult> Dashboard()
         {
-            ViewBag.TotalHabitaciones =
-                _context.Habitaciones.Count();
+            // =========================
+            // KPIs
+            // =========================
+            ViewBag.TotalHabitaciones = await _context.Habitaciones.CountAsync();
+            ViewBag.TotalReservas = await _context.Reservas.CountAsync();
+            ViewBag.TotalUsuarios = await _context.Usuarios.CountAsync();
 
-            ViewBag.TotalReservas =
-                _context.Reservas.Count();
+            // =========================
+            // HABITACIONES DISPONIBLES (CORRECTO)
+            // =========================
+            var habitacionesOcupadas = await _context.Reservas
+                .Select(r => r.HabitacionId)
+                .Distinct()
+                .ToListAsync();
 
-            ViewBag.TotalUsuarios =
-                _context.Usuarios.Count();
+            ViewBag.HabitacionesDisponibles = await _context.Habitaciones
+                .CountAsync(h => !habitacionesOcupadas.Contains(h.Id));
 
-            ViewBag.HabitacionesDisponibles =
-
-            // Reservas recientes
+            // =========================
+            // RESERVAS RECIENTES
+            // =========================
             ViewBag.ReservasRecientes = await _context.Reservas
                 .Include(r => r.Usuario)
                 .Include(r => r.Habitacion)
@@ -36,14 +45,17 @@ namespace HotelCc.Controllers
                 .Take(5)
                 .ToListAsync();
 
-            // Ingresos estimados
+            // =========================
+            // INGRESOS ESTIMADOS
+            // =========================
             var reservas = await _context.Reservas
                 .Include(r => r.Habitacion)
                 .ToListAsync();
 
             decimal ingresos = reservas.Sum(r =>
                 r.Habitacion.Precio *
-                (decimal)(r.FechaSalida - r.FechaEntrada).Days);
+                Math.Max(1, (r.FechaSalida - r.FechaEntrada).Days)
+            );
 
             ViewBag.Ingresos = ingresos;
 

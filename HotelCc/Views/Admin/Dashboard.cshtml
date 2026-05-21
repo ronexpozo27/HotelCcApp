@@ -1,128 +1,151 @@
-﻿@using HotelCc.Models
+﻿@{
+    ViewData["Title"] = "Dashboard Admin";
 
-@{
-    ViewData["Title"] = "Dashboard";
-    var reservas = ViewBag.ReservasRecientes as List<Reserva>;
+    var reservas = ViewBag.ReservasRecientes as List<HotelCc.Models.Reserva>;
 }
 
-<div class="container mt-5">
+<h2 class="mb-4">📊 Dashboard Admin</h2>
 
-    <h1 class="mb-4 text-primary fw-bold">
-        📊 Dashboard Admin
-    </h1>
+<!-- ========================= -->
+<!-- KPIs -->
+<!-- ========================= -->
+<div class="row mb-4">
 
-    <div class="row g-4 mb-5">
-
-        <div class="col-md-3">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-body text-center">
-
-                    <h5>Total Habitaciones</h5>
-
-                    <h2 class="text-primary">
-                        @ViewBag.TotalHabitaciones
-                    </h2>
-
-                </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>🏨 Habitaciones</h6>
+                <h3>@ViewBag.TotalHabitaciones</h3>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-body text-center">
-
-                    <h5>Total Reservas</h5>
-
-                    <h2 class="text-success">
-                        @ViewBag.TotalReservas
-                    </h2>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-body text-center">
-
-                    <h5>Total Usuarios</h5>
-
-                    <h2 class="text-dark">
-                        @ViewBag.TotalUsuarios
-                    </h2>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-body text-center">
-
-                    <h5>Ingresos Estimados</h5>
-
-                    <h2 class="text-danger">
-                        S/ @ViewBag.Ingresos
-                    </h2>
-
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <div class="card shadow border-0 rounded-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>📅 Reservas</h6>
+                <h3>@ViewBag.TotalReservas</h3>
+            </div>
+        </div>
+    </div>
 
-        <div class="card-body">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>👤 Usuarios</h6>
+                <h3>@ViewBag.TotalUsuarios</h3>
+            </div>
+        </div>
+    </div>
 
-            <h3 class="mb-4">
-                🏨 Reservas Recientes
-            </h3>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>💰 Ingresos</h6>
+                <h3 class="text-success">S/ @ViewBag.Ingresos</h3>
+            </div>
+        </div>
+    </div>
 
-            <table class="table table-hover align-middle">
+</div>
 
-                <thead class="table-dark">
+<!-- ========================= -->
+<!-- RESERVAS RECIENTES -->
+<!-- ========================= -->
+<div class="card shadow-sm border-0">
 
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Habitación</th>
-                        <th>Entrada</th>
-                        <th>Salida</th>
-                    </tr>
+    <div class="card-header bg-dark text-white">
+        🏨 Reservas Recientes
+    </div>
 
-                </thead>
+    <div class="card-body p-0">
 
-                <tbody>
+        <table class="table table-hover mb-0">
 
-                    @foreach (var item in reservas!)
+            <thead class="table-light">
+                <tr>
+                    <th>Usuario</th>
+                    <th>Habitación</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Registro</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (reservas != null && reservas.Any())
+                {
+                    foreach (var r in reservas)
                     {
                         <tr>
 
+                            <!-- USUARIO -->
                             <td>
-                                @item.Usuario?.Nombre
+                                👤
+                                @(r.Usuario?.Nombre ?? r.NombreHuespedExterno ?? "Externo")
                             </td>
 
+                            <!-- HABITACIÓN -->
                             <td>
-                                @item.Habitacion?.Numero
+                                🏨 @r.Habitacion?.Numero
                             </td>
 
+                            <!-- ENTRADA -->
                             <td>
-                                @item.FechaEntrada.ToString("dd/MM/yyyy")
+                                @r.FechaEntrada.ToString("dd/MM/yyyy")
                             </td>
 
+                            <!-- SALIDA -->
                             <td>
-                                @item.FechaSalida.ToString("dd/MM/yyyy")
+                                @r.FechaSalida.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <!-- REGISTRO -->
+                            <td>
+                                @r.FechaReserva.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+
+                            <!-- TOTAL -->
+                            <td>
+                                <span class="fw-bold text-success">
+                                    S/ @r.Total.ToString("0.00")
+                                </span>
                             </td>
 
                         </tr>
                     }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted p-3">
+                            No hay reservas registradas
+                        </td>
+                    </tr>
+                }
 
-                </tbody>
+            </tbody>
 
-            </table>
-
-        </div>
+        </table>
 
     </div>
-
 </div>
+
+<!-- ========================= -->
+<!-- ESTILOS -->
+<!-- ========================= -->
+<style>
+    .card {
+        border-radius: 12px;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    h3 {
+        font-weight: 700;
+    }
+</style>

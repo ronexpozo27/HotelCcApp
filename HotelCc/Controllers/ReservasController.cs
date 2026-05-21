@@ -54,6 +54,21 @@ namespace HotelCc.Controllers
             if (habitacion == null)
                 return NotFound();
 
+            var rol = HttpContext.Session.GetString("Rol");
+
+            ViewBag.EsAdmin = (rol == "Admin");
+
+            // SOLO USERS
+            ViewData["UsuarioId"] = new SelectList(
+                _context.Usuarios
+                    .Where(u =>
+                        u.Rol != null &&
+                        u.Rol.Trim().ToLower() == "user")
+                    .OrderBy(u => u.Nombre),
+                "Id",
+                "Nombre"
+            );
+
             var model = new Reserva
             {
                 HabitacionId = id,
@@ -67,91 +82,166 @@ namespace HotelCc.Controllers
         }
 
         // =========================
-        // POST RESERVAR USUARIO
+        // POST RESERVAR
         // =========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reservar(Reserva reserva)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
+            var rol = HttpContext.Session.GetString("Rol");
 
             if (userId == null)
                 return RedirectToAction("Login", "Auth");
 
-            var fechaEntrada = DateTime.SpecifyKind(reserva.FechaEntrada.Date, DateTimeKind.Unspecified);
-            var fechaSalida = DateTime.SpecifyKind(reserva.FechaSalida.Date, DateTimeKind.Unspecified);
-
-            if (fechaSalida <= fechaEntrada)
+            // =========================
+            // VALIDAR FECHAS
+            // =========================
+            if (reserva.FechaSalida <= reserva.FechaEntrada)
             {
-                ViewBag.Error = "Fecha inválida";
+                ViewBag.Error = "La fecha de salida debe ser mayor.";
+
                 return View(reserva);
             }
 
+            // =========================
+            // ADMIN / USER
+            // =========================
+            if (rol == "Admin")
+            {
+                if (reserva.UsuarioId == null &&
+                    string.IsNullOrWhiteSpace(reserva.NombreHuespedExterno))
+                {
+                    ViewBag.Error =
+                        "Debe seleccionar un usuario o ingresar huésped externo.";
+
+                    return View(reserva);
+                }
+
+                if (reserva.UsuarioId != null)
+                {
+                    reserva.NombreHuespedExterno = null;
+                }
+                else
+                {
+                    reserva.UsuarioId = null;
+                }
+            }
+            else
+            {
+                reserva.UsuarioId = userId;
+                reserva.NombreHuespedExterno = null;
+            }
+
+            // =========================
+            // VALIDAR DISPONIBILIDAD
+            // =========================
             bool ocupada = await _context.Reservas.AnyAsync(r =>
                 r.HabitacionId == reserva.HabitacionId &&
-                fechaEntrada < r.FechaSalida &&
-                fechaSalida > r.FechaEntrada);
+                reserva.FechaEntrada < r.FechaSalida &&
+                reserva.FechaSalida > r.FechaEntrada);
 
             if (ocupada)
             {
-                ViewBag.Error = "Habitación ocupada";
+                ViewBag.Error = "La habitación ya está reservada.";
+
                 return View(reserva);
             }
 
-            var habitacion = await _context.Habitaciones
-                .FirstOrDefaultAsync(h => h.Id == reserva.HabitacionId);
-
-            int dias = (fechaSalida - fechaEntrada).Days;
-            if (dias <= 0) dias = 1;
-
-            decimal total = dias * habitacion!.Precio;
-
-            var nuevaReserva = new Reserva
-            {
-                UsuarioId = userId.Value,
-                HabitacionId = reserva.HabitacionId,
-                FechaEntrada = fechaEntrada,
-                FechaSalida = fechaSalida,
-                FechaReserva = DateTime.Now,
-                Total = total
-            };
-
-            _context.Reservas.Add(nuevaReserva);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index");
-        }
-
-        // =========================
-        // CREATE ADMIN (USUARIO O EXTERNO)
-        // =========================
-        public IActionResult Create()
-        {
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Nombre");
-
-            ViewData["HabitacionId"] = new SelectList(
-                _context.Habitaciones
-                    .OrderBy(h => h.Numero),
-                "Id",
-                "Numero"
-            );
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Reserva reserva)
-        {
+            // =========================
+            // HABITACIÓN
+            // =========================
             var habitacion = await _context.Habitaciones
                 .FirstOrDefaultAsync(h => h.Id == reserva.HabitacionId);
 
             if (habitacion == null)
+            {
                 return NotFound();
+            }
 
+            // =========================
+            // TOTAL
+            // =========================
+            int dias = (reserva.FechaSalida - reserva.FechaEntrada).Days;
+
+            if (dias <= 0)
+            {
+                dias = 1;
+            }
+
+            reserva.Total = dias * habitacion.Precio;
+
+            // =========================
+            // FECHA RESERVA
+            // =========================
+            reserva.FechaReserva = DateTime.Now;
+
+            _context.Reservas.Add(reserva);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =========================
+        // CREATE ADMIN
+        // =========================
+        public IActionResult Create()
+        {
+            var usuarios = _context.Usuarios
+                .Where(u =>
+                    u.Rol != null &&
+                    u.Rol.Trim().ToLower() == "user")
+                .OrderBy(u => u.Nombre)
+                .ToList();
+
+            ViewData["UsuarioId"] =
+                new SelectList(usuarios, "Id", "Nombre");
+
+            ViewData["HabitacionId"] =
+                new SelectList(
+                    _context.Habitaciones.OrderBy(h => h.Numero),
+                    "Id",
+                    "Numero"
+                );
+
+            return View();
+        }
+
+        // =========================
+        // POST CREATE
+        // =========================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Reserva reserva)
+        {
+            // =========================
+            // HABITACIÓN
+            // =========================
+            var habitacion = await _context.Habitaciones
+                .FirstOrDefaultAsync(h => h.Id == reserva.HabitacionId);
+
+            if (habitacion == null)
+            {
+                return NotFound();
+            }
+
+            // =========================
+            // FECHAS
+            // =========================
             var fechaEntrada = reserva.FechaEntrada.Date;
             var fechaSalida = reserva.FechaSalida.Date;
 
+            if (fechaSalida <= fechaEntrada)
+            {
+                ViewBag.Error = "La fecha de salida debe ser mayor.";
+
+                return View(reserva);
+            }
+
+            // =========================
+            // USER / EXTERNO
+            // =========================
             if (reserva.UsuarioId != null)
             {
                 reserva.NombreHuespedExterno = null;
@@ -161,26 +251,59 @@ namespace HotelCc.Controllers
                 reserva.UsuarioId = null;
             }
 
+            // =========================
+            // DISPONIBILIDAD
+            // =========================
+            bool ocupada = await _context.Reservas.AnyAsync(r =>
+                r.HabitacionId == reserva.HabitacionId &&
+                fechaEntrada < r.FechaSalida &&
+                fechaSalida > r.FechaEntrada);
+
+            if (ocupada)
+            {
+                ViewBag.Error = "La habitación ya está reservada.";
+
+                return View(reserva);
+            }
+
+            // =========================
+            // TOTAL
+            // =========================
             int dias = (fechaSalida - fechaEntrada).Days;
-            if (dias <= 0) dias = 1;
+
+            if (dias <= 0)
+            {
+                dias = 1;
+            }
 
             decimal total = dias * habitacion.Precio;
 
+            // =========================
+            // NUEVA RESERVA
+            // =========================
             var nuevaReserva = new Reserva
             {
                 UsuarioId = reserva.UsuarioId,
-                NombreHuespedExterno = reserva.NombreHuespedExterno,
+
+                NombreHuespedExterno =
+                    reserva.NombreHuespedExterno,
+
                 HabitacionId = reserva.HabitacionId,
+
                 FechaEntrada = fechaEntrada,
+
                 FechaSalida = fechaSalida,
+
                 FechaReserva = DateTime.Now,
+
                 Total = total
             };
 
             _context.Reservas.Add(nuevaReserva);
+
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         // =========================
@@ -227,6 +350,7 @@ namespace HotelCc.Controllers
             if (reserva != null)
             {
                 _context.Reservas.Remove(reserva);
+
                 await _context.SaveChangesAsync();
             }
 
