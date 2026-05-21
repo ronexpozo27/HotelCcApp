@@ -1,0 +1,316 @@
+﻿@model HotelCc.Models.Reserva
+
+@{
+    ViewData["Title"] = "Reservar";
+}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+
+            <div class="card border-0 shadow rounded-4">
+
+                <div class="card-body p-4">
+
+                    <h2 class="fw-bold mb-4">
+                        🏨 Reservar Habitación
+                    </h2>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger rounded-3">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <form asp-action="Reservar"
+                          method="post"
+                          onsubmit="return validarReserva()">
+
+                        <input type="hidden"
+                               asp-for="HabitacionId" />
+
+                        <!-- ========================= -->
+                        <!-- ADMIN -->
+                        <!-- ========================= -->
+                        @if (ViewBag.EsAdmin == true)
+                        {
+                            <div class="mb-4">
+
+                                <label class="form-label fw-bold">
+                                    ¿Para quién es la reserva?
+                                </label>
+
+                                <!-- RADIO USER -->
+                                <div class="form-check">
+
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="tipoCliente"
+                                           id="radioUsuario"
+                                           checked>
+
+                                    <label class="form-check-label">
+                                        👤 Usuario registrado
+                                    </label>
+
+                                </div>
+
+                                <!-- RADIO EXTERNO -->
+                                <div class="form-check mb-3">
+
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="tipoCliente"
+                                           id="radioExterno">
+
+                                    <label class="form-check-label">
+                                        🧍 Huésped externo
+                                    </label>
+
+                                </div>
+
+                                <!-- BOX USUARIO -->
+                                <div id="boxUsuario">
+
+                                    <label class="form-label">
+                                        Seleccionar usuario
+                                    </label>
+
+                                    <select asp-for="UsuarioId"
+                                            class="form-control rounded-3"
+                                            asp-items="ViewBag.UsuarioId">
+
+                                        <option value="">
+                                            -- Usuario registrado --
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                                <!-- BOX EXTERNO -->
+                                <div id="boxExterno"
+                                     style="display:none;">
+
+                                    <label class="form-label mt-3">
+                                        Nombre del huésped externo
+                                    </label>
+
+                                    <input asp-for="NombreHuespedExterno"
+                                           class="form-control rounded-3"
+                                           placeholder="Ej: Juan Pérez" />
+
+                                </div>
+
+                            </div>
+                        }
+
+                        <!-- ========================= -->
+                        <!-- FECHA ENTRADA -->
+                        <!-- ========================= -->
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Fecha Entrada
+                            </label>
+
+                            <input asp-for="FechaEntrada"
+                                   type="date"
+                                   class="form-control rounded-3" />
+
+                        </div>
+
+                        <!-- ========================= -->
+                        <!-- FECHA SALIDA -->
+                        <!-- ========================= -->
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Fecha Salida
+                            </label>
+
+                            <input asp-for="FechaSalida"
+                                   type="date"
+                                   class="form-control rounded-3" />
+
+                        </div>
+
+                        <!-- ========================= -->
+                        <!-- BOTÓN -->
+                        <!-- ========================= -->
+
+                        <div class="d-grid gap-2">
+
+                            <!-- RESERVAR -->
+                            <button type="submit"
+                                    id="btnReservar"
+                                    class="btn btn-primary rounded-3">
+
+                                ✅ Confirmar Reserva
+
+                            </button>
+
+                            <!-- CANCELAR -->
+                            <a asp-controller="Habitaciones"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary rounded-3">
+
+                                ↩ Volver a Habitaciones
+
+                            </a>
+
+                        </div>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- SCRIPT -->
+<!-- ========================= -->
+<script>
+
+    const esAdmin = @Json.Serialize(ViewBag.EsAdmin);
+
+    if (esAdmin) {
+        const radioUsuario =
+            document.getElementById("radioUsuario");
+
+        const radioExterno =
+            document.getElementById("radioExterno");
+
+        const boxUsuario =
+            document.getElementById("boxUsuario");
+
+        const boxExterno =
+            document.getElementById("boxExterno");
+
+        const usuarioSelect =
+            document.querySelector('[name="UsuarioId"]');
+
+        const externoInput =
+            document.querySelector('[name="NombreHuespedExterno"]');
+
+        const btn =
+            document.getElementById("btnReservar");
+
+        // =========================
+        // CAMBIAR VISTA
+        // =========================
+        function actualizarVista() {
+            if (radioUsuario.checked) {
+                boxUsuario.style.display = "block";
+                boxExterno.style.display = "none";
+
+                externoInput.value = "";
+            }
+            else {
+                boxUsuario.style.display = "none";
+                boxExterno.style.display = "block";
+
+                usuarioSelect.value = "";
+            }
+
+            validarBoton();
+        }
+
+        // =========================
+        // VALIDAR BOTÓN
+        // =========================
+        function validarBoton() {
+            let valido = false;
+
+            if (radioUsuario.checked) {
+                valido =
+                    usuarioSelect.value !== "";
+            }
+            else {
+                valido =
+                    externoInput.value.trim() !== "";
+            }
+
+            btn.disabled = !valido;
+        }
+
+        // =========================
+        // VALIDAR FORM
+        // =========================
+        window.validarReserva = function () {
+            if (radioUsuario.checked &&
+                usuarioSelect.value === "") {
+                alert("⚠️ Debe seleccionar un usuario.");
+                return false;
+            }
+
+            if (radioExterno.checked &&
+                externoInput.value.trim() === "") {
+                alert("⚠️ Debe ingresar el nombre del huésped.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // =========================
+        // EVENTS
+        // =========================
+        radioUsuario.addEventListener(
+            "change",
+            actualizarVista
+        );
+
+        radioExterno.addEventListener(
+            "change",
+            actualizarVista
+        );
+
+        usuarioSelect.addEventListener(
+            "change",
+            validarBoton
+        );
+
+        externoInput.addEventListener(
+            "input",
+            validarBoton
+        );
+
+        // =========================
+        // INICIO
+        // =========================
+        actualizarVista();
+    }
+
+</script>
+
+<!-- ========================= -->
+<!-- ESTILOS -->
+<!-- ========================= -->
+<style>
+
+    .card {
+        border-radius: 20px;
+    }
+
+    .form-control {
+        min-height: 45px;
+    }
+
+    .btn {
+        min-height: 45px;
+        font-weight: 600;
+    }
+
+</style>

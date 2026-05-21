@@ -1,0 +1,108 @@
+﻿@model HotelCc.Models.Usuario
+
+@{
+    ViewData["Title"] = "Eliminar Usuario";
+}
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow rounded-4">
+
+                <div class="card-header bg-danger text-white rounded-top-4">
+
+                    <h3 class="mb-0">
+                        🗑 Eliminar Usuario
+                    </h3>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="alert alert-warning">
+
+                        ¿Seguro que deseas eliminar este usuario?
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Nombre
+                        </label>
+
+                        <h5>
+                            @Model.Nombre
+                        </h5>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Correo
+                        </label>
+
+                        <h5>
+                            @Model.Email
+                        </h5>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="text-muted">
+                            Rol
+                        </label>
+
+                        <div>
+
+                            @if (Model.Rol == "Admin")
+                            {
+                                <span class="badge bg-danger">
+                                    Admin
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary">
+                                    User
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <form asp-action="Delete">
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="d-flex gap-2">
+
+                            <button type="submit"
+                                    class="btn btn-danger">
+                                Eliminar
+                            </button>
+
+                            <a asp-action="Index"
+                               class="btn btn-secondary">
+                                Cancelar
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
