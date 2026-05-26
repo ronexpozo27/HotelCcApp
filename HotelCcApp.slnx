@@ -1,5 +1,4 @@
 <Solution>
   <Project Path="HotelCc/HotelCc.csproj" />
-  <Project Path="TestProject1/TestProject1.csproj" Id="01d13f9c-9eeb-473a-8b21-a9c9e5162555" />
-  <Project Path="TestProject2/TestProject2.csproj" Id="f05c2605-a6a7-4a37-a045-1c14a132253e" />
+  <Project Path="TestProject1/TestProject1.csproj" Id="30834cee-ccf9-494a-a980-924410cafb56" />
 </Solution>

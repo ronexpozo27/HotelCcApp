@@ -2,6 +2,7 @@
 using HotelCc.Models;
 using HotelCc.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelCc.Controllers
 {
@@ -89,6 +90,20 @@ namespace HotelCc.Controllers
             {
                 return View(model);
             }
+
+            // =========================
+            // VALIDAR EMAIL DUPLICADO
+            // =========================
+            var existe = await _context.Usuarios
+                .AnyAsync(u => u.Email == model.Email);
+
+            if (existe)
+            {
+                ModelState.AddModelError("", "El email ya existe");
+
+                return View(model);
+            }
+
 
             Usuario user = new Usuario()
             {
