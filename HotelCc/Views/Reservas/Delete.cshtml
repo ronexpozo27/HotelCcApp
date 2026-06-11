@@ -1,0 +1,97 @@
+@model HotelCc.Models.Reserva
+
+@{
+    ViewData["Title"] = "Eliminar Reserva";
+}
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow rounded-4">
+
+                <div class="card-header bg-danger text-white rounded-top-4">
+
+                    <h3 class="mb-0">
+                        🗑 Eliminar Reserva
+                    </h3>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="alert alert-warning">
+
+                        ¿Seguro que deseas eliminar esta reserva?
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Usuario
+                        </label>
+
+                        <h5>
+                            @Model.Usuario?.Nombre
+                        </h5>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Habitación
+                        </label>
+
+                        <h5>
+                            🛏 @Model.Habitacion?.Numero
+                        </h5>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="text-muted">
+                            Fechas
+                        </label>
+
+                        <h5>
+                            @Model.FechaEntrada.ToString("dd/MM/yyyy")
+                            →
+                            @Model.FechaSalida.ToString("dd/MM/yyyy")
+                        </h5>
+
+                    </div>
+
+                    <form asp-action="Delete">
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="d-flex gap-2">
+
+                            <button type="submit"
+                                    class="btn btn-danger">
+                                Eliminar
+                            </button>
+
+                            <a asp-action="Index"
+                               class="btn btn-secondary">
+                                Cancelar
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

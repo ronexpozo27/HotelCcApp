@@ -1,0 +1,125 @@
+@model HotelCc.Models.Reserva
+
+@{
+    ViewData["Title"] = "Nueva Reserva";
+}
+
+<h2 class="mb-4">➕ Nueva Reserva (Modo Admin)</h2>
+
+<form asp-action="Create" method="post">
+
+    <!-- ========================= -->
+    <!-- TIPO CLIENTE -->
+    <!-- ========================= -->
+    <div class="mb-3">
+        <label class="form-label fw-bold">¿Para quién es la reserva?</label>
+
+        <div class="form-check">
+            <input class="form-check-input"
+                   type="radio"
+                   id="tipoUsuario"
+                   name="tipoCliente"
+                   value="usuario"
+                   checked />
+
+            <label class="form-check-label">👤 Usuario registrado</label>
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input"
+                   type="radio"
+                   id="tipoExterno"
+                   name="tipoCliente"
+                   value="externo" />
+
+            <label class="form-check-label">🧍 Huésped externo</label>
+        </div>
+    </div>
+
+    <hr />
+
+    <!-- ========================= -->
+    <!-- USUARIO -->
+    <!-- ========================= -->
+    <div class="mb-3" id="usuarioBox">
+        <label>Usuario registrado</label>
+
+        <select asp-for="UsuarioId"
+                class="form-control"
+                asp-items="ViewBag.UsuarioId">
+            <option value="">-- Seleccione un Usuario --</option>
+        </select>
+    </div>
+
+    <!-- ========================= -->
+    <!-- EXTERNO -->
+    <!-- ========================= -->
+    <div class="mb-3" id="externoBox" style="display:none;">
+        <label>Nombre huésped externo</label>
+
+        <input asp-for="NombreHuespedExterno"
+               class="form-control"
+               placeholder="Ej: Juan Pérez" />
+    </div>
+
+    <hr />
+
+    <!-- ========================= -->
+    <!-- HABITACIÓN -->
+    <!-- ========================= -->
+    <div class="mb-3">
+        <label>Habitación</label>
+
+        <select asp-for="HabitacionId"
+                class="form-control"
+                asp-items="ViewBag.HabitacionId"></select>
+    </div>
+
+    <!-- ========================= -->
+    <!-- FECHAS -->
+    <!-- ========================= -->
+    <div class="row">
+
+        <div class="col-md-6 mb-3">
+            <label>Fecha Entrada</label>
+            <input asp-for="FechaEntrada" type="date" class="form-control" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Fecha Salida</label>
+            <input asp-for="FechaSalida" type="date" class="form-control" />
+        </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-success w-100">
+        💾 Guardar Reserva
+    </button>
+
+</form>
+
+<!-- ========================= -->
+<!-- SCRIPT CORREGIDO -->
+<!-- ========================= -->
+<script>
+    const usuarioRadio = document.getElementById("tipoUsuario");
+    const externoRadio = document.getElementById("tipoExterno");
+
+    const usuarioBox = document.getElementById("usuarioBox");
+    const externoBox = document.getElementById("externoBox");
+
+    function actualizarVista() {
+        if (usuarioRadio.checked) {
+            usuarioBox.style.display = "block";
+            externoBox.style.display = "none";
+        } else {
+            usuarioBox.style.display = "none";
+            externoBox.style.display = "block";
+        }
+    }
+
+    usuarioRadio.addEventListener("change", actualizarVista);
+    externoRadio.addEventListener("change", actualizarVista);
+
+    actualizarVista(); // estado inicial
+</script>

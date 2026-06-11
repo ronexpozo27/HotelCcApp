@@ -1,0 +1,151 @@
+﻿@{
+    ViewData["Title"] = "Dashboard Admin";
+
+    var reservas = ViewBag.ReservasRecientes as List<HotelCc.Models.Reserva>;
+}
+
+<h2 class="mb-4">📊 Dashboard Admin</h2>
+
+<!-- ========================= -->
+<!-- KPIs -->
+<!-- ========================= -->
+<div class="row mb-4">
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>🏨 Habitaciones</h6>
+                <h3>@ViewBag.TotalHabitaciones</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>📅 Reservas</h6>
+                <h3>@ViewBag.TotalReservas</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>👤 Usuarios</h6>
+                <h3>@ViewBag.TotalUsuarios</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6>💰 Ingresos</h6>
+                <h3 class="text-success">S/ @ViewBag.Ingresos</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- RESERVAS RECIENTES -->
+<!-- ========================= -->
+<div class="card shadow-sm border-0">
+
+    <div class="card-header bg-dark text-white">
+        🏨 Reservas Recientes
+    </div>
+
+    <div class="card-body p-0">
+
+        <table class="table table-hover mb-0">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Usuario</th>
+                    <th>Habitación</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Registro</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (reservas != null && reservas.Any())
+                {
+                    foreach (var r in reservas)
+                    {
+                        <tr>
+
+                            <!-- USUARIO -->
+                            <td>
+                                👤
+                                @(r.Usuario?.Nombre ?? r.NombreHuespedExterno ?? "Externo")
+                            </td>
+
+                            <!-- HABITACIÓN -->
+                            <td>
+                                🏨 @r.Habitacion?.Numero
+                            </td>
+
+                            <!-- ENTRADA -->
+                            <td>
+                                @r.FechaEntrada.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <!-- SALIDA -->
+                            <td>
+                                @r.FechaSalida.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <!-- REGISTRO -->
+                            <td>
+                                @r.FechaReserva.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+
+                            <!-- TOTAL -->
+                            <td>
+                                <span class="fw-bold text-success">
+                                    S/ @r.Total.ToString("0.00")
+                                </span>
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted p-3">
+                            No hay reservas registradas
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- ESTILOS -->
+<!-- ========================= -->
+<style>
+    .card {
+        border-radius: 12px;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    h3 {
+        font-weight: 700;
+    }
+</style>

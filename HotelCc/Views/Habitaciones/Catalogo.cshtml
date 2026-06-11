@@ -1,0 +1,76 @@
+﻿@model IEnumerable<HotelCc.Models.Habitacion>
+
+@{
+    Layout = "_LayoutPublic";
+    ViewData["Title"] = "Habitaciones";
+}
+
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <h1 class="fw-bold">
+            🏨 Nuestras Habitaciones
+        </h1>
+
+        <p class="text-muted">
+            Elige la habitación perfecta para tu estadía.
+        </p>
+
+    </div>
+
+    <div class="row">
+
+        @foreach (var h in Model)
+        {
+            string imagen = "/images/habitaciones/100.jpg";
+
+            if (h.Numero.StartsWith("2"))
+            {
+                imagen = "/images/habitaciones/200.jpg";
+            }
+            else if (h.Numero.StartsWith("3"))
+            {
+                imagen = "/images/habitaciones/300.jpg";
+            }
+
+            <div class="col-md-4 mb-4">
+
+                <div class="card shadow border-0 rounded-4 h-100">
+
+                    <img src="@imagen"
+                         class="card-img-top"
+                         style="height:250px;object-fit:cover;">
+
+                    <div class="card-body text-center">
+
+                        <h4>
+                            Habitación @h.Numero
+                        </h4>
+
+                        <p>
+                            @h.Tipo
+                        </p>
+
+                        <h3 class="text-primary">
+                            S/ @h.Precio
+                        </h3>
+
+                        <a asp-action="Details"
+                           asp-route-id="@h.Id"
+                           class="btn btn-dark">
+
+                            Ver Detalle
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

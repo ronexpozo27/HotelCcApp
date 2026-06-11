@@ -1,0 +1,134 @@
+@model HotelCc.Models.Habitacion
+
+@{
+    Layout = "_LayoutPublic";
+    ViewData["Title"] = "Habitación " + Model.Numero;
+
+    string imagen = "/images/habitaciones/100.jpg";
+
+    if (Model.Numero.StartsWith("2"))
+    {
+        imagen = "/images/habitaciones/200.jpg";
+    }
+    else if (Model.Numero.StartsWith("3"))
+    {
+        imagen = "/images/habitaciones/300.jpg";
+    }
+}
+
+<div class="container py-5">
+
+    <div class="row g-5">
+
+        <!-- IMAGEN -->
+
+        <div class="col-lg-6">
+
+            <img src="@imagen"
+                 class="img-fluid rounded-4 shadow w-100">
+
+        </div>
+
+        <!-- INFO -->
+
+        <div class="col-lg-6">
+
+            <h1 class="fw-bold mb-3">
+
+                🛏 Habitación @Model.Numero
+
+            </h1>
+
+            <h4 class="text-muted mb-4">
+
+                @Model.Tipo
+
+            </h4>
+
+            <h2 class="text-primary fw-bold mb-4">
+
+                S/ @Model.Precio
+
+                <small class="text-muted">
+                    por noche
+                </small>
+
+            </h2>
+
+            <hr />
+
+            <h5 class="mb-3">
+                Servicios incluidos
+            </h5>
+
+            <div class="d-flex flex-wrap gap-2 mb-4">
+
+                <span class="badge bg-secondary">
+                    📶 Wifi
+                </span>
+
+                <span class="badge bg-secondary">
+                    ❄ Aire acondicionado
+                </span>
+
+                <span class="badge bg-secondary">
+                    🚿 Baño privado
+                </span>
+
+                @if (Model.Numero.StartsWith("2"))
+                {
+                    <span class="badge bg-info text-dark">
+                        🛁 Jacuzzi
+                    </span>
+                }
+
+                @if (Model.Numero.StartsWith("3"))
+                {
+                    <span class="badge bg-info text-dark">
+                        🛁 Jacuzzi
+                    </span>
+
+                    <span class="badge bg-warning text-dark">
+                        🍽 Comida incluida
+                    </span>
+
+                    <span class="badge bg-success">
+                        🛎 Servicio premium
+                    </span>
+                }
+
+            </div>
+
+            <p class="text-muted">
+
+                Disfruta de una estancia cómoda y segura en Hotel CC.
+                Todas nuestras habitaciones cuentan con limpieza diaria,
+                conexión WiFi y atención personalizada.
+
+            </p>
+
+            <div class="mt-4">
+
+                <a asp-controller="Reservas"
+                   asp-action="Reservar"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-primary btn-lg">
+
+                    Reservar Ahora
+
+                </a>
+
+                <a asp-action="Catalogo"
+                   class="btn btn-outline-dark btn-lg ms-2">
+
+                    Volver
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
