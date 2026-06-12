@@ -1,6 +1,7 @@
 ﻿@{
     var rol = Context.Session.GetString("Rol");
     var usuario = Context.Session.GetString("Usuario");
+    var userId = Context.Session.GetInt32("UserId");
 }
 
 <!DOCTYPE html>
@@ -17,8 +18,10 @@
 
     <div class="d-flex">
 
-        <!-- SIDEBAR -->
-        <div class="bg-dark text-white p-3" style="width:250px; min-height:100vh;">
+        @if (userId != null)
+        {
+            <!-- SIDEBAR -->
+            <div class="bg-dark text-white p-3" style="width:250px; min-height:100vh;">
 
             <h4 class="text-center mb-4">
                 🏨 HotelCc
@@ -42,6 +45,14 @@
                 <li class="nav-item mb-2">
                     <a class="nav-link text-white" asp-controller="Reservas" asp-action="Index">
                         📅 Reservas
+                    </a>
+                </li>
+
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white"
+                       asp-controller="Reservas"
+                       asp-action="Historial">
+                        📚 Historial
                     </a>
                 </li>
 
@@ -82,9 +93,36 @@
             </ul>
 
         </div>
+                
+        }
 
-        <!-- CONTENT -->
-        <div class="flex-grow-1 p-4">
+    <!-- CONTENT -->
+    <div class="flex-grow-1">
+
+            @if (userId != null)
+            {
+                <div class="d-flex justify-content-end align-items-center px-4 py-3 border-bottom bg-light">
+
+                    <div class="d-flex align-items-center">
+
+                        <div class="rounded-circle bg-primary text-white fw-bold
+                            d-flex justify-content-center align-items-center"
+                             style="width:40px;height:40px;">
+
+                            @(usuario?.Substring(0, 1).ToUpper())
+
+                        </div>
+
+                        <span class="ms-2 fw-semibold">
+                            @usuario
+                        </span>
+
+                    </div>
+
+                </div>
+            }
+
+        <div class="p-4">
 
             @RenderBody()
 

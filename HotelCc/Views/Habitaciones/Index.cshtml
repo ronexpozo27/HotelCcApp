@@ -61,95 +61,7 @@
 
     </div>
 
-    <!-- ESTADÍSTICAS -->
-
-    <div class="row mb-4">
-
-        <div class="col-md-4 mb-3">
-
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body">
-
-                    <h6 class="text-muted">
-                        Total Habitaciones
-                    </h6>
-
-                    <h2 class="fw-bold">
-                        @ViewBag.Total
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-md-4 mb-3">
-
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body">
-
-                    <h6 class="text-muted">
-                        Disponibles
-                    </h6>
-
-                    <h2 class="fw-bold text-success">
-                        @ViewBag.Disponibles
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-md-4 mb-3">
-
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body">
-
-                    <h6 class="text-muted">
-                        Ocupadas
-                    </h6>
-
-                    <h2 class="fw-bold text-danger">
-                        @ViewBag.Ocupadas
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- FILTROS -->
-
-    <div class="mb-4 d-flex gap-2 flex-wrap">
-
-        <a asp-action="Index"
-           class="btn btn-outline-dark rounded-pill">
-            Todas
-        </a>
-
-        <a asp-action="Index"
-           asp-route-estado="Disponible"
-           class="btn btn-outline-success rounded-pill">
-            Disponibles
-        </a>
-
-        <a asp-action="Index"
-           asp-route-estado="Ocupada"
-           class="btn btn-outline-danger rounded-pill">
-            Ocupadas
-        </a>
-
-    </div>
-
+    
     <!-- HABITACIONES -->
 
     <div class="row g-4">
@@ -169,8 +81,8 @@
 
             <div class="col-md-6 col-lg-4 col-xl-3">
 
-                <a asp-controller="Reservas"
-                   asp-action="Reservar"
+                <a asp-controller="Habitaciones"
+                   asp-action="Detalle"
                    asp-route-id="@item.Id"
                    class="text-decoration-none text-dark">
 
@@ -200,19 +112,7 @@
 
                                 </div>
 
-                                @if (item.Estado == "Disponible")
-                                {
-                                    <span class="badge bg-success px-3 py-2 rounded-pill">
-                                        Disponible
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger px-3 py-2 rounded-pill">
-                                        Ocupada
-                                    </span>
-                                }
-
+                                
                             </div>
 
                             <!-- PRECIO -->

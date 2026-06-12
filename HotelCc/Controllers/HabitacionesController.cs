@@ -73,6 +73,20 @@ namespace HotelCc.Controllers
             return View(habitacion);
         }
 
+        //=========================
+        //DETALLES DE FECHA OCUPADA
+        //=========================
+        public async Task<IActionResult> Detalle(int id)
+        {
+            var habitacion = await _context.Habitaciones
+                .FirstOrDefaultAsync(h => h.Id == id);
+
+            if (habitacion == null)
+                return NotFound();
+
+            return View(habitacion);
+        }
+
         // =========================
         // CREATE
         // =========================

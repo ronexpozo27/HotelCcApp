@@ -43,18 +43,18 @@ namespace HotelCc.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "EsExterno",
-                table: "Reservas",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            //migrationBuilder.AddColumn<bool>(
+            //    name: "EsExterno",
+            //    table: "Reservas",
+            //    type: "boolean",
+            //    nullable: false,
+            //    defaultValue: false);
 
-            migrationBuilder.AddColumn<string>(
-                name: "NombreHuespedExterno",
-                table: "Reservas",
-                type: "text",
-                nullable: true);
+            //migrationBuilder.AddColumn<string>(
+            //    name: "NombreHuespedExterno",
+            //    table: "Reservas",
+            //    type: "text",
+            //    nullable: true);
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "Precio",
@@ -68,13 +68,13 @@ namespace HotelCc.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "EsExterno",
-                table: "Reservas");
+            //migrationBuilder.DropColumn(
+            //    name: "EsExterno",
+            //    table: "Reservas");
 
-            migrationBuilder.DropColumn(
-                name: "NombreHuespedExterno",
-                table: "Reservas");
+            //migrationBuilder.DropColumn(
+            //    name: "NombreHuespedExterno",
+            //    table: "Reservas");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "Total",

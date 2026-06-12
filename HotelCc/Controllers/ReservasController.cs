@@ -20,6 +20,26 @@ namespace HotelCc.Controllers
         // =========================
         public async Task<IActionResult> Index()
         {
+
+            // =========================
+            // FINALIZAR RESERVAS VENCIDAS
+            // =========================
+            var vencidas = await _context.Reservas
+                .Where(r =>
+                    r.Estado == "Activa" &&
+                    r.FechaSalida < DateTime.Today)
+                .ToListAsync();
+
+            foreach (var r in vencidas)
+            {
+                r.Estado = "Finalizada";
+            }
+
+            if (vencidas.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
+
             var rol = HttpContext.Session.GetString("Rol");
             var userId = HttpContext.Session.GetInt32("UserId");
 
@@ -37,11 +57,45 @@ namespace HotelCc.Controllers
             var reservasUser = await _context.Reservas
                 .Include(r => r.Usuario)
                 .Include(r => r.Habitacion)
-                .Where(r => r.UsuarioId == userId)
+                .Where(r =>
+                    r.UsuarioId == userId &&
+                    r.Estado == "Activa")
                 .OrderByDescending(r => r.Id)
                 .ToListAsync();
 
             return View(reservasUser);
+        }
+
+        // =========================
+        // HISTORIAL USUARIO
+        // =========================
+        public async Task<IActionResult> Historial()
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (rol == "Admin")
+            {
+                var historialAdmin = await _context.Reservas
+                    .Include(r => r.Usuario)
+                    .Include(r => r.Habitacion)
+                    .Where(r => r.Estado == "Finalizada")
+                    .OrderByDescending(r => r.FechaSalida)
+                    .ToListAsync();
+
+                return View(historialAdmin);
+            }
+
+            var historialUser = await _context.Reservas
+                .Include(r => r.Usuario)
+                .Include(r => r.Habitacion)
+                .Where(r =>
+                    r.UsuarioId == userId &&
+                    r.Estado == "Finalizada")
+                .OrderByDescending(r => r.FechaSalida)
+                .ToListAsync();
+
+            return View(historialUser);
         }
 
         // =========================
@@ -95,6 +149,27 @@ namespace HotelCc.Controllers
             ViewBag.Habitacion = habitacion;
 
             return View(model);
+        }
+
+        //============================================================
+        //GET ENDPOINT PARA OBTENER FECHAS OCUPADAS DE UNA HABITACIÓN
+        //============================================================
+
+        [HttpGet]
+        public async Task<IActionResult> FechasOcupadas(int habitacionId)
+        {
+            var reservas = await _context.Reservas
+                .Where(r =>
+                    r.HabitacionId == habitacionId &&
+                    r.Estado == "Activa")
+                .Select(r => new
+                {
+                    entrada = r.FechaEntrada,
+                    salida = r.FechaSalida
+                })
+                .ToListAsync();
+
+            return Json(reservas);
         }
 
         // =========================

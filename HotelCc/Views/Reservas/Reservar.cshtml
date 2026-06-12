@@ -120,8 +120,10 @@
                             </label>
 
                             <input asp-for="FechaEntrada"
-                                   type="date"
-                                   class="form-control rounded-3" />
+                                   id="fechaEntrada"
+                                   class="form-control rounded-3"
+                                   autocomplete="off"
+                                   readonly />
 
                         </div>
 
@@ -135,8 +137,10 @@
                             </label>
 
                             <input asp-for="FechaSalida"
-                                   type="date"
-                                   class="form-control rounded-3" />
+                                   id="fechaSalida"
+                                   class="form-control rounded-3"
+                                   autocomplete="off"
+                                   readonly />
 
                         </div>
 
@@ -316,3 +320,74 @@
     }
 
 </style>
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+    const habitacionId =
+    document.querySelector('[name="HabitacionId"]').value;
+
+    const response =
+    await fetch(`/Reservas/FechasOcupadas?habitacionId=${habitacionId}`);
+
+    const reservas = await response.json();
+
+    let fechasBloqueadas = [];
+
+    reservas.forEach(r => {
+
+    let inicio = new Date(r.entrada);
+    let fin = new Date(r.salida);
+
+    while (inicio < fin) {
+    fechasBloqueadas.push(
+    inicio.toISOString().split("T")[0]
+    );
+
+    inicio.setDate(
+    inicio.getDate() + 1
+    );
+    }
+
+    });
+
+    flatpickr("#fechaEntrada", {
+
+    altInput: true,
+    altFormat: "d/m/Y",
+
+    dateFormat: "Y-m-d",
+
+    minDate: "today",
+
+    disable: fechasBloqueadas,
+
+    allowInput: false
+
+    });
+
+    flatpickr("#fechaSalida", {
+
+    altInput: true,
+    altFormat: "d/m/Y",
+
+    dateFormat: "Y-m-d",
+
+    minDate: "today",
+
+    disable: fechasBloqueadas,
+
+    allowInput: false
+
+    });
+
+    });
+
+</script>

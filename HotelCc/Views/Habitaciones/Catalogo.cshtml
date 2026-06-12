@@ -19,54 +19,146 @@
 
     </div>
 
-    <div class="row">
+    <!-- HABITACIONES -->
 
-        @foreach (var h in Model)
+    <div class="row g-4">
+
+        @foreach (var item in Model)
         {
             string imagen = "/images/habitaciones/100.jpg";
 
-            if (h.Numero.StartsWith("2"))
+            if (item.Numero.StartsWith("2"))
             {
                 imagen = "/images/habitaciones/200.jpg";
             }
-            else if (h.Numero.StartsWith("3"))
+            else if (item.Numero.StartsWith("3"))
             {
                 imagen = "/images/habitaciones/300.jpg";
             }
 
-            <div class="col-md-4 mb-4">
+            <div class="col-md-6 col-lg-4 col-xl-3">
 
-                <div class="card shadow border-0 rounded-4 h-100">
+                <a asp-controller="Habitaciones"
+                   asp-action="Detalle"
+                   asp-route-id="@item.Id"
+                   class="text-decoration-none text-dark">
 
-                    <img src="@imagen"
-                         class="card-img-top"
-                         style="height:250px;object-fit:cover;">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 habitacion-card">
 
-                    <div class="card-body text-center">
+                        <!-- IMAGEN -->
 
-                        <h4>
-                            Habitación @h.Numero
-                        </h4>
+                        <img src="@imagen"
+                             class="card-img-top rounded-top-4"
+                             style="height: 230px; object-fit: cover;">
 
-                        <p>
-                            @h.Tipo
-                        </p>
+                        <!-- BODY -->
 
-                        <h3 class="text-primary">
-                            S/ @h.Precio
-                        </h3>
+                        <div class="card-body d-flex flex-column">
 
-                        <a asp-action="Details"
-                           asp-route-id="@h.Id"
-                           class="btn btn-dark">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
 
-                            Ver Detalle
+                                <div>
 
-                        </a>
+                                    <h4 class="fw-bold mb-1">
+                                        🛏 @item.Numero
+                                    </h4>
+
+                                    <small class="text-muted">
+                                        @item.Tipo
+                                    </small>
+
+                                </div>
+
+                                
+                            </div>
+
+                            <!-- PRECIO -->
+
+                            <div class="mb-4">
+
+                                <h3 class="text-primary fw-bold">
+                                    S/ @item.Precio
+                                </h3>
+
+                                <small class="text-muted">
+                                    por noche
+                                </small>
+
+                            </div>
+
+                            <!-- SERVICIOS -->
+
+                            <div class="mb-4">
+
+                                @{
+                                    var numero = item.Numero?.ToString() ?? "";
+                                }
+
+                                <div class="d-flex flex-wrap gap-2">
+
+                                    <!-- BASE -->
+
+                                    <span class="badge bg-secondary">
+                                        📶 Wifi
+                                    </span>
+
+                                    <span class="badge bg-secondary">
+                                        ❄ Aire
+                                    </span>
+
+                                    <span class="badge bg-secondary">
+                                        🚿 Baño
+                                    </span>
+
+                                    <!-- PISO 1 -->
+                                    @if (numero.StartsWith("1"))
+                                    {
+                                        <span class="badge bg-dark">
+                                            📺 TV
+                                        </span>
+                                    }
+
+                                    <!-- PISO 2 -->
+                                    @if (numero.StartsWith("2"))
+                                    {
+                                        <span class="badge bg-dark">
+                                            📺 TV
+                                        </span>
+
+                                        <span class="badge bg-info text-dark">
+                                            🛁 Jacuzzi
+                                        </span>
+                                    }
+
+                                    <!-- PISO 3 -->
+                                    @if (numero.StartsWith("3"))
+                                    {
+                                        <span class="badge bg-dark">
+                                            📺 TV
+                                        </span>
+
+                                        <span class="badge bg-info text-dark">
+                                            🛁 Jacuzzi
+                                        </span>
+
+                                        <span class="badge bg-warning text-dark">
+                                            🍽 Comida
+                                        </span>
+
+                                        <span class="badge bg-success">
+                                            🛎 Servicio
+                                        </span>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                </div>
+                </a>
 
             </div>
         }

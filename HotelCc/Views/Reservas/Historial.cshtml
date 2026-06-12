@@ -1,0 +1,80 @@
+﻿@model IEnumerable<HotelCc.Models.Reserva>
+
+@{
+    ViewData["Title"] = "Historial";
+}
+
+<h2 class="mb-4">
+    📚 Historial de Reservas
+</h2>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <table class="table table-hover">
+
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Habitación</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+                            @if (item.Usuario != null)
+                            {
+                                <span>👤 @item.Usuario.Nombre</span>
+                            }
+                            else if (!string.IsNullOrEmpty(item.NombreHuespedExterno))
+                            {
+                                <span>🧍 @item.NombreHuespedExterno</span>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+
+                        <td>
+                            🏨 @item.Habitacion?.Numero
+                        </td>
+
+                        <td>
+                            @item.FechaEntrada.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>
+                            @item.FechaSalida.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>
+                            S/ @item.Total
+                        </td>
+
+                        <td>
+                            <span class="badge bg-secondary">
+                                @item.Estado
+                            </span>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

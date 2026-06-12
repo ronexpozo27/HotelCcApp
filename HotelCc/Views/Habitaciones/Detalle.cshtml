@@ -1,0 +1,241 @@
+﻿@model HotelCc.Models.Habitacion
+
+@{
+    ViewData["Title"] = "Detalle Habitación";
+}
+
+<div class="container py-5">
+
+    <div class="row">
+
+        <h2 class="fw-bold mb-3">
+            🏨 Habitación @Model.Numero
+        </h2>
+
+        <h5 class="text-muted mb-3">
+            @Model.Tipo
+        </h5>
+
+        <h3 class="text-primary fw-bold mb-4">
+            S/ @Model.Precio
+            <small class="text-muted fs-6">
+                por noche
+            </small>
+        </h3>
+
+        <!-- FOTO -->
+        <div class="col-md-6">
+
+            @{
+                string imagen = "/images/habitaciones/100.jpg";
+
+                if (Model.Numero.StartsWith("2"))
+                {
+                    imagen = "/images/habitaciones/200.jpg";
+                }
+                else if (Model.Numero.StartsWith("3"))
+                {
+                    imagen = "/images/habitaciones/300.jpg";
+                }
+            }
+
+            <img src="@imagen"
+                 class="img-fluid rounded-4 shadow"
+                 style="width:100%; height:500px; object-fit:cover;">
+        </div>
+
+        <!-- DETALLE -->
+        <div class="col-md-6">
+
+            
+
+            <hr />
+
+            <h5 class="fw-bold mb-3">
+                ✨ Servicios incluidos
+            </h5>
+
+            @{
+                var numero = Model.Numero?.ToString() ?? "";
+            }
+
+            <div class="d-flex flex-wrap gap-2 mb-4">
+
+                <!-- BASE -->
+                <span class="badge bg-secondary">
+                    📶 Wifi
+                </span>
+
+                <span class="badge bg-secondary">
+                    ❄ Aire acondicionado
+                </span>
+
+                <span class="badge bg-secondary">
+                    🚿 Baño privado
+                </span>
+
+                <!-- PISO 1 -->
+                @if (numero.StartsWith("1"))
+                {
+                    <span class="badge bg-dark">
+                        📺 Smart TV
+                    </span>
+                }
+
+                <!-- PISO 2 -->
+                @if (numero.StartsWith("2"))
+                {
+                    <span class="badge bg-dark">
+                        📺 Smart TV
+                    </span>
+
+                    <span class="badge bg-info text-dark">
+                        🛁 Jacuzzi
+                    </span>
+                }
+
+                <!-- PISO 3 -->
+                @if (numero.StartsWith("3"))
+                {
+                    <span class="badge bg-dark">
+                        📺 Smart TV
+                    </span>
+
+                    <span class="badge bg-info text-dark">
+                        🛁 Jacuzzi
+                    </span>
+
+                    <span class="badge bg-warning text-dark">
+                        🍽 Desayuno incluido
+                    </span>
+
+                    <span class="badge bg-success">
+                        🛎 Room Service
+                    </span>
+                }
+
+            </div>
+
+            <hr />
+
+            <h4 class="mb-3">
+                📅 Disponibilidad
+            </h4>
+
+            <div id="calendarioDisponibilidad"></div>
+
+            
+
+        </div>
+
+    </div>
+
+   
+</div>
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+    const habitacionId = @Model.Id;
+
+    const response =
+    await fetch(`/Reservas/FechasOcupadas?habitacionId=${habitacionId}`);
+
+    const reservas = await response.json();
+
+    let fechasBloqueadas = [];
+
+    reservas.forEach(r => {
+
+    let inicio = new Date(r.entrada);
+    let fin = new Date(r.salida);
+
+    while (inicio < fin) {
+    let fecha =
+    inicio.getFullYear() + "-" +
+    String(inicio.getMonth() + 1).padStart(2, "0") + "-" +
+    String(inicio.getDate()).padStart(2, "0");
+
+    fechasBloqueadas.push(fecha);
+
+    inicio.setDate(inicio.getDate() + 1);
+    }
+    });
+
+    flatpickr("#calendarioDisponibilidad", {
+
+        inline: true,
+
+        minDate: "today",
+
+        disable: fechasBloqueadas,
+
+        onDayCreate: function (dObj, dStr, fp, dayElem) {
+
+            const fecha =
+                dayElem.dateObj.getFullYear() + "-" +
+                String(dayElem.dateObj.getMonth() + 1).padStart(2, "0") + "-" +
+                String(dayElem.dateObj.getDate()).padStart(2, "0");
+
+            if (fechasBloqueadas.includes(fecha)) {
+                dayElem.style.background = "#dc3545";
+                dayElem.style.color = "white";
+                dayElem.style.borderRadius = "50%";
+                dayElem.style.opacity = "1";
+            }
+        }
+        });
+
+    });
+
+</script>
+
+<div class="mt-3">
+
+    <span class="badge bg-success">
+        🟢 Disponible
+    </span>
+
+    <span class="badge bg-danger ms-2">
+        🔴 Ocupada
+    </span>
+
+</div>
+
+<div class="mt-4">
+
+    <a asp-controller="Reservas"
+       asp-action="Reservar"
+       asp-route-id="@Model.Id"
+       class="btn btn-primary btn-lg">
+
+        Reservar esta habitación
+
+    </a>
+
+</div>
+
+<style>
+
+    .flatpickr-calendar {
+    box-shadow: none !important;
+    }
+
+    .badge {
+    font-size: 0.95rem;
+    padding: 10px 15px;
+    }
+
+    .badge {
+    font-size: 0.95rem;
+    padding: 10px 15px;
+    border-radius: 12px;
+    }
+
+</style>

@@ -15,6 +15,7 @@
         public DateTime FechaReserva { get; set; }
 
         public decimal Total { get; set; }
+        public string Estado { get; set; } = "Activa";
 
         // ADMIN / EXTERNO
         public bool EsExterno { get; set; }
