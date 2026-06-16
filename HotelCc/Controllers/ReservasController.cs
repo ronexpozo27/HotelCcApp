@@ -3,6 +3,8 @@ using HotelCc.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Sockets;
+using QRCoder;
 
 namespace HotelCc.Controllers
 {
@@ -128,6 +130,8 @@ namespace HotelCc.Controllers
 
             ViewBag.EsAdmin = (rol == "Admin");
 
+
+
             // SOLO USERS
             ViewData["UsuarioId"] = new SelectList(
                 _context.Usuarios
@@ -173,6 +177,14 @@ namespace HotelCc.Controllers
         }
 
         // =========================
+        // PAGO
+        // =========================
+        public IActionResult Pago()
+        {
+            return View();
+        }
+
+        // =========================
         // POST RESERVAR
         // =========================
         [HttpPost]
@@ -185,6 +197,13 @@ namespace HotelCc.Controllers
 
             if (userId == null)
                 return RedirectToAction("Login", "Auth");
+
+            // NUEVO
+            if (string.IsNullOrEmpty(reserva.MetodoPago))
+            {
+                ViewBag.Error = "Seleccione un método de pago";
+                return View(reserva);
+            }
 
             // =========================
             // VALIDAR FECHAS
@@ -268,11 +287,27 @@ namespace HotelCc.Controllers
             // =========================
             reserva.FechaReserva = DateTime.Now;
 
-            _context.Reservas.Add(reserva);
+                HttpContext.Session.SetString(
+                    "HabitacionId",
+                reserva.HabitacionId.ToString());
 
-            await _context.SaveChangesAsync();
+                HttpContext.Session.SetString(
+                    "FechaEntrada",
+                    reserva.FechaEntrada.ToString("yyyy-MM-dd"));
 
-            return RedirectToAction(nameof(Index));
+                HttpContext.Session.SetString(
+                    "FechaSalida",
+                    reserva.FechaSalida.ToString("yyyy-MM-dd"));
+
+                HttpContext.Session.SetString(
+                    "MetodoPago",
+                    reserva.MetodoPago);
+
+                HttpContext.Session.SetString(
+                    "Total",
+                    reserva.Total.ToString());
+
+            return RedirectToAction("Pago");
         }
 
         // =========================
@@ -393,12 +428,178 @@ namespace HotelCc.Controllers
                 Total = total
             };
 
-            _context.Reservas.Add(nuevaReserva);
+            TempData["MetodoPago"] = reserva.MetodoPago;
+            TempData["Total"] = reserva.Total;
+
+            return RedirectToAction("Pago");
+        }
+
+        // =========================
+        // PAGO CONFIRMADO
+        // =========================
+        [HttpPost]
+        public async Task<IActionResult> ConfirmarPago()
+
+        {
+            var habitacionId =
+                int.Parse(HttpContext.Session.GetString("HabitacionId")!);
+
+            var fechaEntrada =
+                DateTime.Parse(HttpContext.Session.GetString("FechaEntrada")!);
+
+            var fechaSalida =
+                DateTime.Parse(HttpContext.Session.GetString("FechaSalida")!);
+
+            var metodoPago =
+                HttpContext.Session.GetString("MetodoPago")!;
+
+            var total =
+                decimal.Parse(HttpContext.Session.GetString("Total")!);
+
+            var userId =
+                HttpContext.Session.GetInt32("UserId");
+
+            // =========================
+            // CREAR RESERVA
+            // =========================
+
+            Reserva reserva = new()
+            {
+                HabitacionId = habitacionId,
+                UsuarioId = userId,
+                FechaEntrada = fechaEntrada,
+                FechaSalida = fechaSalida,
+                FechaReserva = DateTime.Now,
+                Total = total,
+                Estado = "Activa"
+            };
+
+            // GUARDAR RESERVA
+            _context.Reservas.Add(reserva);
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            //Generar código de operación
+            var codigoOperacion =
+                "PAGO-" +
+                Guid.NewGuid()
+                    .ToString("N")
+                    .Substring(0, 8)
+                    .ToUpper();
+
+            //Crear Pago
+            Pago pago = new()
+            {
+                ReservaId = reserva.Id,
+
+                Monto = total,
+
+                MetodoPago = metodoPago,
+
+                FechaPago = DateTime.UtcNow,
+
+                Estado = "Pagado",
+
+                CodigoOperacion = codigoOperacion
+            };
+
+            //Guardar Pago
+            _context.Pagos.Add(pago);
+
+            await _context.SaveChangesAsync();
+
+            // =========================
+            // GENERAR QR
+            // =========================
+
+            var habitacion = await _context.Habitaciones
+                .FirstOrDefaultAsync(h => h.Id == habitacionId);
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            string textoQr =
+                $@"HOTEL CC
+                Reserva: {reserva.Id}
+                Cliente: {usuario?.Nombre}
+                Habitacion: {habitacion?.Numero}
+                Entrada: {fechaEntrada:dd/MM/yyyy}
+                Salida: {fechaSalida:dd/MM/yyyy}
+                Monto: S/ {total}
+                Codigo: {codigoOperacion}";
+
+            QRCodeGenerator qrGenerator =
+                new QRCodeGenerator();
+
+            QRCodeData qrCodeData =
+                qrGenerator.CreateQrCode(
+                    textoQr,
+                    QRCodeGenerator.ECCLevel.Q);
+
+            PngByteQRCode qrCode =
+                new PngByteQRCode(qrCodeData);
+
+            byte[] qrBytes =
+                qrCode.GetGraphic(20);
+
+            string qrBase64 =
+                Convert.ToBase64String(qrBytes);
+
+            //Guardar datos para Ticket
+            TempData["CodigoOperacion"] =
+                codigoOperacion;
+
+            TempData["MetodoPago"] =
+                metodoPago;
+
+            TempData["Monto"] =
+                total.ToString();
+
+            TempData["ReservaId"] =
+                reserva.Id.ToString();
+            TempData["QR"] =
+                qrBase64;
+
+            TempData["Cliente"] =
+                usuario?.Nombre;
+
+            TempData["Habitacion"] =
+                habitacion?.Numero;
+
+            TempData["FechaEntrada"] =
+                fechaEntrada.ToString("dd/MM/yyyy");
+
+            TempData["FechaSalida"] =
+                fechaSalida.ToString("dd/MM/yyyy");
+
+            TempData["FechaPago"] =
+                DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                        
+            //Redirigir a Ticket
+            return RedirectToAction("Ticket");
+                        
         }
+
+        //Crear acción Ticket
+        public async Task<IActionResult> Ticket(int id)
+        {
+            var reserva = await _context.Reservas
+                .Include(r => r.Usuario)
+                .Include(r => r.Habitacion)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (reserva == null)
+                return NotFound();
+
+            var pago = await _context.Pagos
+                .FirstOrDefaultAsync(p => p.ReservaId == id);
+
+            ViewBag.Reserva = reserva;
+            ViewBag.Pago = pago;
+
+            return View();
+        }
+
 
         // =========================
         // DETAILS

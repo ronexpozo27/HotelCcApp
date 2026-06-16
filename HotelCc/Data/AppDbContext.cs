@@ -19,6 +19,7 @@ namespace HotelCc.Data
         public DbSet<Habitacion> Habitaciones { get; set; }
 
         public DbSet<Reserva> Reservas { get; set; }
+        public DbSet<Pago> Pagos { get; set; }
 
         // =========================
         // CONFIGURACIONES

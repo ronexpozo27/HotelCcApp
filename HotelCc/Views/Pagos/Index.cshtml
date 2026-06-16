@@ -1,0 +1,101 @@
+﻿@model IEnumerable<HotelCc.Models.Pago>
+
+<p>
+    Rol actual: @Context.Session.GetString("Rol")
+</p>
+
+@if (Context.Session.GetString("Rol") == "Admin")
+    {
+        <h2 class="mb-4">
+            💳 Todos los Pagos
+        </h2>
+    }
+else
+    {
+        <h2 class="mb-4">
+            💳 Mis Pagos
+        </h2>
+    }
+
+<table class="table table-striped">
+
+    <thead>
+
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Habitación</th>
+            <th>Método</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Código</th>
+            <th>Acciones</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        @foreach (var pago in Model)
+        {
+            <tr>
+
+                <td>@pago.Id</td>
+
+                <td>
+                    @pago.Reserva.Usuario.Nombre
+                </td>
+
+                <td>
+                    @pago.Reserva.Habitacion.Numero
+                </td>
+
+                <td>
+                    @pago.MetodoPago
+                </td>
+
+                <td>
+                    S/ @pago.Monto
+                </td>
+
+                <td>
+                    @if (pago.Estado == "Pagado")
+                    {
+                        <span class="badge bg-success">
+                            Pagado
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            @pago.Estado
+                        </span>
+                    }
+                </td>
+
+                <td>
+                    @pago.FechaPago.ToString("dd/MM/yyyy HH:mm")
+                </td>
+
+                <td>
+                    @pago.CodigoOperacion
+                </td>
+
+                <td>
+
+                    <a asp-controller="Pagos"
+                       asp-action="VerTicket"
+                       asp-route-id="@pago.Id"
+                       class="btn btn-sm btn-primary">
+                        👁 Ver
+                    </a>
+
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

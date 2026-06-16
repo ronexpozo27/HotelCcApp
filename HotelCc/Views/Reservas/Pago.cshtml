@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Pago";
+}
+
+<div class="container py-5">
+
+    <div class="card shadow rounded-4">
+
+        <div class="card-body p-4">
+
+            <h2 class="mb-4">
+                💳 Pantalla de Pago
+            </h2>
+
+            <p>
+                Método:
+                @Context.Session.GetString("MetodoPago")
+            </p>
+
+            <p>
+                Total:
+                <strong>
+                    S/ @Context.Session.GetString("Total")
+                </strong>
+            </p>
+
+            <hr />
+
+            @if (TempData["MetodoPago"]?.ToString() == "Yape")
+            {
+                <div class="alert alert-info">
+
+                    📱 Yape
+
+                    <br />
+
+                    Código:
+                    YAPE-123456
+
+                </div>
+            }
+
+            @if (TempData["MetodoPago"]?.ToString() == "Plin")
+            {
+                <div class="alert alert-success">
+
+                    📱 Plin
+
+                    <br />
+
+                    Código:
+                    PLIN-123456
+
+                </div>
+            }
+
+            <form asp-action="ConfirmarPago"
+                  method="post">
+
+                <button type="submit"
+                        class="btn btn-success">
+
+                    ✅ Confirmar Pago
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

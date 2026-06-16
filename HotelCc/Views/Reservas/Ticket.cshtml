@@ -1,0 +1,93 @@
+﻿@{
+    var reserva = ViewBag.Reserva as HotelCc.Models.Reserva;
+    var pago = ViewBag.Pago as HotelCc.Models.Pago;
+
+    ViewData["Title"] = "Ticket";
+}
+
+<div class="container py-5">
+
+    <div class="card shadow rounded-4">
+
+        <div class="card-body p-5">
+
+            <h2 class="text-success mb-4">
+                🎟 Ticket de Pago
+            </h2>
+
+            <hr />
+
+            <p>
+                <strong>Cliente:</strong>
+                @reserva.Usuario.Nombre
+            </p>
+
+            <p>
+                <strong>Habitación:</strong>
+                @reserva.Habitacion.Numero
+            </p>
+
+            <p>
+                <strong>Entrada:</strong>
+                @reserva.FechaEntrada.ToString("dd/MM/yyyy")
+            </p>
+
+            <p>
+                <strong>Salida:</strong>
+                @reserva.FechaSalida.ToString("dd/MM/yyyy")
+            </p>
+
+            <p>
+                <strong>Método de Pago:</strong>
+                @pago.MetodoPago
+            </p>
+
+            <p>
+                <strong>Código Operación:</strong>
+                @pago.CodigoOperacion
+            </p>
+                        
+            <p>
+                <strong>Monto:</strong>
+                S/ @pago.Monto
+            </p>
+
+            <p>
+                <strong>Fecha Pago:</strong>
+                @pago.FechaPago.ToString("dd/MM/yyyy HH:mm")
+            </p>
+
+            @if (TempData["QR"] != null)
+            {
+                <div class="text-center mt-4">
+
+                    <img src="data:image/png;base64,@TempData["QR"]"
+                         width="220"
+                         class="img-thumbnail rounded-4" />
+
+                    <p class="mt-2 text-muted">
+                        Escanee este QR para verificar la reserva
+                    </p>
+
+                </div>
+            }
+
+            <hr />
+
+            <div class="alert alert-success">
+                ✅ Reserva confirmada y pagada correctamente
+            </div>
+
+            <a asp-controller="Reservas"
+               asp-action="Index"
+               class="btn btn-primary">
+
+                Ver Mis Reservas
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

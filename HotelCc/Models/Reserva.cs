@@ -1,4 +1,6 @@
-﻿namespace HotelCc.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace HotelCc.Models
 {
     public class Reserva
     {
@@ -16,10 +18,14 @@
 
         public decimal Total { get; set; }
         public string Estado { get; set; } = "Activa";
+        [NotMapped]
+        public string MetodoPago { get; set; } = "";
 
         // ADMIN / EXTERNO
         public bool EsExterno { get; set; }
 
         public string? NombreHuespedExterno { get; set; } // 👈 ESTE FALTABA
+        public Pago? Pago { get; set; }
+        
     }
 }
