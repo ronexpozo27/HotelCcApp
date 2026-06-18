@@ -3,8 +3,13 @@ using HotelCc.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Sockets;
+using Microsoft.SqlServer.Server;
 using QRCoder;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using System.Data.SqlTypes;
+using System.Net.Sockets;
 
 namespace HotelCc.Controllers
 {
@@ -487,27 +492,6 @@ namespace HotelCc.Controllers
                     .Substring(0, 8)
                     .ToUpper();
 
-            //Crear Pago
-            Pago pago = new()
-            {
-                ReservaId = reserva.Id,
-
-                Monto = total,
-
-                MetodoPago = metodoPago,
-
-                FechaPago = DateTime.UtcNow,
-
-                Estado = "Pagado",
-
-                CodigoOperacion = codigoOperacion
-            };
-
-            //Guardar Pago
-            _context.Pagos.Add(pago);
-
-            await _context.SaveChangesAsync();
-
             // =========================
             // GENERAR QR
             // =========================
@@ -545,6 +529,29 @@ namespace HotelCc.Controllers
             string qrBase64 =
                 Convert.ToBase64String(qrBytes);
 
+            //Crear Pago
+            Pago pago = new()
+            {
+                ReservaId = reserva.Id,
+
+                Monto = total,
+
+                MetodoPago = metodoPago,
+
+                FechaPago = DateTime.UtcNow,
+
+                Estado = "Pagado",
+
+                CodigoOperacion = codigoOperacion,
+
+                QrBase64 = qrBase64
+            };
+
+            //Guardar Pago
+            _context.Pagos.Add(pago);
+
+            await _context.SaveChangesAsync();
+                        
             //Guardar datos para Ticket
             TempData["CodigoOperacion"] =
                 codigoOperacion;
@@ -574,14 +581,22 @@ namespace HotelCc.Controllers
 
             TempData["FechaPago"] =
                 DateTime.Now.ToString("dd/MM/yyyy HH:mm");
-                        
+
             //Redirigir a Ticket
-            return RedirectToAction("Ticket");
-                        
+            return RedirectToAction(
+                "Ticket",
+                new
+                {
+                    id = reserva.Id,
+                    origen = "reserva"
+                });
+
         }
 
         //Crear acción Ticket
-        public async Task<IActionResult> Ticket(int id)
+        public async Task<IActionResult> Ticket(
+            int id,
+            string origen = "")
         {
             var reserva = await _context.Reservas
                 .Include(r => r.Usuario)
@@ -596,8 +611,222 @@ namespace HotelCc.Controllers
 
             ViewBag.Reserva = reserva;
             ViewBag.Pago = pago;
+            ViewBag.QR = pago?.QrBase64;
+            ViewBag.Origen = origen;
 
             return View();
+        }
+
+        //descargar ticket en PDF tamaño A4
+        [HttpGet]
+        public async Task<IActionResult> DescargarTicketPDF(
+            int id,
+            string formato = "a4")
+        {
+            var reserva = await _context.Reservas
+                .Include(r => r.Usuario)
+                .Include(r => r.Habitacion)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (reserva == null)
+                return NotFound();
+
+            var pago = await _context.Pagos
+                .FirstOrDefaultAsync(p => p.ReservaId == id);
+
+            if (pago == null)
+                return NotFound();
+
+            byte[] qrBytes = Convert.FromBase64String(
+                pago.QrBase64
+            );
+
+            var logoPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "images",
+                "habitaciones",
+                "logo.jpg");
+
+            byte[] logoBytes = System.IO.File.ReadAllBytes(
+                logoPath);
+
+            var pdf = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    
+                    page.Margin(50);
+                 
+                    page.Header().Column(header =>
+                    {
+                        header.Item()
+                            .AlignCenter()
+                            .Width(150)
+                            .Image(logoBytes);
+
+                        header.Item()
+                            .PaddingTop(10)
+                            .AlignCenter()
+                            .Text("🎟 TICKET DE PAGO")
+                            .FontSize(24)
+                            .Bold();
+                    });
+
+                    page.Content().Column(col =>
+                    {
+                        col.Spacing(8);
+
+                        col.Item().Text($"Cliente: {reserva.Usuario?.Nombre}");
+
+                        col.Item().Text($"Habitación: {reserva.Habitacion?.Numero}");
+
+                        col.Item().Text(
+                            $"Entrada: {reserva.FechaEntrada:dd/MM/yyyy}");
+
+                        col.Item().Text(
+                            $"Salida: {reserva.FechaSalida:dd/MM/yyyy}");
+
+                        col.Item().Text(
+                            $"Método de Pago: {pago.MetodoPago}");
+
+                        col.Item().Text(
+                            $"Código Operación: {pago.CodigoOperacion}");
+
+                        col.Item().Text(
+                            $"Monto: S/ {pago.Monto}");
+
+                        col.Item().Text(
+                            $"Fecha Pago: {pago.FechaPago:dd/MM/yyyy HH:mm}");
+
+                        col.Item().PaddingTop(20);
+
+                        col.Item()
+                           .AlignCenter()
+                           .Width(150)
+                           .Image(qrBytes);
+
+                        col.Item()
+                            .AlignCenter()
+                            .Text("Escanee este QR para verificar la reserva");
+                    });
+
+                    page.Footer().Column(footer =>
+                    {
+                        footer.Item()
+                            .PaddingTop(5)
+                            .AlignCenter()
+                            .Text(
+                                "El uso de este comprobante está sujeto a las normas, políticas y condiciones establecidas por Hotel CC. Conserve este documento para cualquier consulta o verificación futura.")
+                            .FontSize(8)
+                            .Italic();
+                    });
+
+                });
+            });
+
+            var pdfBytes = pdf.GeneratePdf();
+
+            return File(
+                pdfBytes,
+                "application/pdf",
+                $"HotelCC_{reserva.Usuario?.Nombre}.pdf");
+        }
+
+        //Descargar ticket en formato térmico (80mm)
+        [HttpGet]
+        public async Task<IActionResult> DescargarTicketTermicoPDF(int id)
+        {
+            var reserva = await _context.Reservas
+                .Include(r => r.Usuario)
+                .Include(r => r.Habitacion)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (reserva == null)
+                return NotFound();
+
+            var pago = await _context.Pagos
+                .FirstOrDefaultAsync(p => p.ReservaId == id);
+
+            if (pago == null)
+                return NotFound();
+
+            byte[] qrBytes =
+                Convert.FromBase64String(pago.QrBase64);
+
+            var logoPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "images",
+                "habitaciones",
+                "logo.jpg");
+
+            byte[] logoBytes =
+                System.IO.File.ReadAllBytes(logoPath);
+
+            var pdf = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Margin(10);
+
+                    page.Header().Column(header =>
+                    {
+                        header.Item()
+                            .AlignCenter()
+                            .Width(80)
+                            .Image(logoBytes);
+
+                        header.Item()
+                            .AlignCenter()
+                            .Text("HOTEL CC")
+                            .Bold()
+                            .FontSize(14);
+                    });
+
+                    page.Content().Column(col =>
+                    {
+                        col.Spacing(5);
+
+                        col.Item().Text($"Reserva: {reserva.Id}");
+                        col.Item().Text($"Cliente: {reserva.Usuario?.Nombre}");
+                        col.Item().Text($"Habitación: {reserva.Habitacion?.Numero}");
+
+                        col.Item().Text(
+                            $"Entrada: {reserva.FechaEntrada:dd/MM/yyyy}");
+
+                        col.Item().Text(
+                            $"Salida: {reserva.FechaSalida:dd/MM/yyyy}");
+
+                        col.Item().Text(
+                            $"Pago: {pago.MetodoPago}");
+
+                        col.Item().Text(
+                            $"Monto: S/ {pago.Monto}");
+
+                        col.Item().Text(
+                            $"Código: {pago.CodigoOperacion}");
+
+                        col.Item()
+                            .PaddingTop(10)
+                            .AlignCenter()
+                            .Width(120)
+                            .Image(qrBytes);
+
+                        col.Item()
+                            .AlignCenter()
+                            .Text("Gracias por su preferencia")
+                            .FontSize(8);
+                    });
+                });
+            });
+
+            var pdfBytes = pdf.GeneratePdf();
+
+            return File(
+                pdfBytes,
+                "application/pdf",
+                $"TicketTermico_{reserva.Id}.pdf");
         }
 
 

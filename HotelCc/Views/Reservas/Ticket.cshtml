@@ -1,4 +1,7 @@
-﻿@{
+﻿
+
+
+@{
     var reserva = ViewBag.Reserva as HotelCc.Models.Reserva;
     var pago = ViewBag.Pago as HotelCc.Models.Pago;
 
@@ -57,13 +60,13 @@
                 @pago.FechaPago.ToString("dd/MM/yyyy HH:mm")
             </p>
 
-            @if (TempData["QR"] != null)
+            @if (ViewBag.QR != null)
             {
                 <div class="text-center mt-4">
 
-                    <img src="data:image/png;base64,@TempData["QR"]"
+                    <img src="data:image/png;base64,@ViewBag.QR"
                          width="220"
-                         class="img-thumbnail rounded-4" />
+                         class="img-thumbnail rounded-4 shadow" />
 
                     <p class="mt-2 text-muted">
                         Escanee este QR para verificar la reserva
@@ -78,16 +81,61 @@
                 ✅ Reserva confirmada y pagada correctamente
             </div>
 
-            <a asp-controller="Reservas"
-               asp-action="Index"
-               class="btn btn-primary">
+            <div class="mt-4 d-flex gap-2">            
 
-                Ver Mis Reservas
+                <a asp-action="DescargarTicketTermicoPDF"
+                   asp-route-id="@ViewBag.Reserva.Id"
+                   class="btn btn-dark">
+                    🧾 Ticket Térmico
+                </a>
 
-            </a>
+                <a asp-action="DescargarTicketPDF"
+                   asp-route-id="@ViewBag.Reserva.Id"
+                   asp-route-formato="a4"
+                   class="btn btn-danger">
+                   📄 A4 PDF
+                </a>
+
+                @if (ViewBag.Origen == "pagos")
+                {
+                    <a asp-controller="Pagos"
+                       asp-action="Index"
+                       class="btn btn-outline-dark">
+                        ❌ Cerrar
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Reservas"
+                       asp-action="Index"
+                       class="btn btn-outline-dark">
+                        ❌ Cerrar
+                    </a>
+                }
+
+            </div>
 
         </div>
 
     </div>
 
 </div>
+
+<style>
+    @@media print {
+
+        .btn,
+        .alert {
+            display: none !important;
+        }
+
+        body {
+            background: white;
+        }
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>

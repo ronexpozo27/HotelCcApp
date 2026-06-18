@@ -16,5 +16,6 @@
         public string Estado { get; set; } = "Pagado";
 
         public string CodigoOperacion { get; set; } = "";
+        public string? QrBase64 { get; set; }
     }
 }

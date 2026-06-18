@@ -44,6 +44,7 @@ namespace HotelCc.Controllers
             return View(pagosUsuario);
         }
 
+        // GET: Pagos/VerTicket/5
         public async Task<IActionResult> VerTicket(int id)
         {
             var pago = await _context.Pagos
@@ -56,7 +57,11 @@ namespace HotelCc.Controllers
             return RedirectToAction(
                 "Ticket",
                 "Reservas",
-                new { id = pago.ReservaId });
+                new
+                {
+                    id = pago.ReservaId,
+                    origen = "pagos"
+                });
         }
     }
 }

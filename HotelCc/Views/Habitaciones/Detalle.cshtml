@@ -4,24 +4,28 @@
     ViewData["Title"] = "Detalle Habitación";
 }
 
-<div class="container py-5">
+<div class="container py-0">
 
     <div class="row">
 
-        <h2 class="fw-bold mb-3">
-            🏨 Habitación @Model.Numero
-        </h2>
+        <div class="d-flex align-items-baseline gap-3 mb-4">
+    
+            <h2 class="fw-bold mb-0">
+                🏨 Habitación @Model.Numero
+            </h2>
+    
+            <h5 class="text-muted mb-0">
+                @Model.Tipo
+            </h5>
+    
+            <h3 class="text-primary fw-bold mb-0">
+                S/ @Model.Precio
+                <small class="text-muted fs-6">
+                    por noche
+                </small>
+            </h3>
 
-        <h5 class="text-muted mb-3">
-            @Model.Tipo
-        </h5>
-
-        <h3 class="text-primary fw-bold mb-4">
-            S/ @Model.Precio
-            <small class="text-muted fs-6">
-                por noche
-            </small>
-        </h3>
+        </div>
 
         <!-- FOTO -->
         <div class="col-md-6">
@@ -42,6 +46,36 @@
             <img src="@imagen"
                  class="img-fluid rounded-4 shadow"
                  style="width:100%; height:500px; object-fit:cover;">
+
+            <div class="mt-2">
+
+                <a asp-controller="Reservas"
+                   asp-action="Reservar"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-primary btn-lg">
+
+                    Reservar
+
+                </a>
+
+                @if (Context.Session.GetInt32("UserId") != null)
+                {
+                    <a asp-controller="Habitaciones"
+                       asp-action="Index"
+                       class="btn btn-secondary btn-lg">
+                        Salir
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-secondary btn-lg">
+                        Regresar a Home
+                    </a>
+                }
+
+            </div>
         </div>
 
         <!-- DETALLE -->
@@ -118,9 +152,14 @@
 
             <hr />
 
-            <h4 class="mb-3">
-                📅 Disponibilidad
-            </h4>
+            <div class="d-flex align-items-center mb-0">
+                <h4 class="mb-0 fs-5 fw-bold">
+                    📅 Disponibilidad
+                </h4>
+                <span class="badge bg-white text-dark ms-2 fs-5 fw-bold">
+                    🔴 Días Ocupados
+                </span>
+            </div>
 
             <div id="calendarioDisponibilidad"></div>
 
@@ -195,31 +234,6 @@
     });
 
 </script>
-
-<div class="mt-3">
-
-    <span class="badge bg-success">
-        🟢 Disponible
-    </span>
-
-    <span class="badge bg-danger ms-2">
-        🔴 Ocupada
-    </span>
-
-</div>
-
-<div class="mt-4">
-
-    <a asp-controller="Reservas"
-       asp-action="Reservar"
-       asp-route-id="@Model.Id"
-       class="btn btn-primary btn-lg">
-
-        Reservar esta habitación
-
-    </a>
-
-</div>
 
 <style>
 

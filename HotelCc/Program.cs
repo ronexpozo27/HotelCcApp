@@ -1,5 +1,6 @@
 using HotelCc.Data;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ builder.Services.AddSession();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 
