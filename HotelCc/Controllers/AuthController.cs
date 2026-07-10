@@ -30,31 +30,64 @@ namespace HotelCc.Controllers
         }
 
 
-        // POST: Login
+        // =========================
+        // POST: LOGIN
+        // =========================
         [HttpPost]
-        public IActionResult Login(
+        public async Task<IActionResult> Login(
             LoginViewModel model,
             string? returnUrl)
         {
-            var usuarios = _context.Usuarios.ToList();
+            // =========================
+            // VALIDAR CAMPOS
+            // =========================
 
-            var user = usuarios.FirstOrDefault(u =>
-                u.Email!.Trim().ToLower() ==
-                model.Email!.Trim().ToLower());
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                ViewBag.Error = "Ingrese su correo electrónico.";
+                return View(model);
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                ViewBag.Error = "Ingrese su contraseña.";
+                return View(model);
+            }
+
+            // =========================
+            // BUSCAR USUARIO
+            // =========================
+
+            var user = await _context.Usuarios
+                .FirstOrDefaultAsync(u =>
+                    u.Email != null &&
+                    u.Email.Trim().ToLower() ==
+                    model.Email.Trim().ToLower());
+
+            // =========================
+            // VALIDAR USUARIO
+            // =========================
 
             if (user == null)
             {
-                ViewBag.Error = "Usuario no encontrado";
-
+                ViewBag.Error = "Correo o contraseña incorrectos.";
                 return View(model);
             }
 
-            if (user.Password!.Trim() != model.Password!.Trim())
+            // =========================
+            // VALIDAR CONTRASEÑA
+            // =========================
+
+            if (string.IsNullOrWhiteSpace(user.Password) ||
+                user.Password.Trim() != model.Password.Trim())
             {
-                ViewBag.Error = "Contraseña incorrecta";
-
+                ViewBag.Error = "Correo o contraseña incorrectos.";
                 return View(model);
             }
+
+            // =========================
+            // CREAR SESIÓN
+            // =========================
 
             HttpContext.Session.SetString(
                 "Usuario",
@@ -68,15 +101,16 @@ namespace HotelCc.Controllers
                 "UserId",
                 user.Id);
 
-            if (!string.IsNullOrEmpty(returnUrl))
+            // =========================
+            // REDIRECCIONAR
+            // =========================
+
+            if (!string.IsNullOrWhiteSpace(returnUrl))
             {
                 return Redirect(returnUrl);
             }
 
-            // DEBUG TEMPORAL
-            Console.WriteLine("ROL = " + user.Rol);
-
-            if (user.Rol!.Trim() == "Admin")
+            if (user.Rol == "Admin")
             {
                 return RedirectToAction(
                     "Dashboard",
@@ -85,9 +119,7 @@ namespace HotelCc.Controllers
 
             return RedirectToAction(
                 "Index",
-                "Reservas");
-
-
+                "Habitaciones");
         }
 
 
