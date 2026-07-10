@@ -3,11 +3,13 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
 
 WORKDIR /src
 
+COPY ["HotelCc.csproj", "./"]
+
+RUN dotnet restore
+
 COPY . .
 
-RUN dotnet restore HotelCc.csproj
-
-RUN dotnet publish HotelCc.csproj \
+RUN dotnet publish \
     -c Release \
     -o /app/publish \
     /p:UseAppHost=false
@@ -23,4 +25,4 @@ ENV ASPNETCORE_URLS=http://+:10000
 
 EXPOSE 10000
 
-ENTRYPOINT ["dotnet","HotelCc.dll"]
+ENTRYPOINT ["dotnet", "HotelCc.dll"]
